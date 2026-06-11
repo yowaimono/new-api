@@ -51,7 +51,7 @@ const Home = () => {
       }
     } else {
       showError(message);
-      setHomePageContent('加载首页内容失败...');
+      setHomePageContent('');
     }
     setHomePageContentLoaded(true);
   };
@@ -111,25 +111,49 @@ const Home = () => {
       <div className='classic-page-fill classic-home-page w-full overflow-x-hidden'>
         <NoticeModal visible={noticeVisible} onClose={() => setNoticeVisible(false)} isMobile={isMobile} />
         {homePageContentLoaded && homePageContent === '' ? (
-          <div className='flex flex-col items-center justify-center min-h-[calc(100vh-64px)] w-full px-6'>
-            <div className='text-center'>
-              <div className='mb-3'>
-                <span className='text-4xl md:text-5xl font-light tracking-widest' style={{ color: 'rgba(255,255,255,0.15)' }}>
-                  KyeAI
-                </span>
-              </div>
-              <h1 className='text-2xl md:text-3xl font-light tracking-wider mb-8' style={{ color: 'rgba(255,255,255,0.4)' }}>
-                {isChinese ? '灵界中转' : 'AI Gateway'}
+          <div className='flex flex-col items-center justify-center min-h-[calc(100vh-64px)] w-full px-6 relative overflow-hidden'>
+            <div className='absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none'
+              style={{
+                background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
+              }}
+            />
+            <div className='relative z-10 text-center max-w-lg mx-auto'>
+              <h1 className='text-[28px] md:text-[36px] font-semibold leading-tight mb-4 tracking-tight'
+                style={{
+                  color: 'rgba(255,255,255,0.9)',
+                  textShadow: '0 0 40px rgba(99,102,241,0.15)',
+                }}
+              >
+                {isChinese ? '一个接口，接驳所有 AI' : 'One API to Connect All AI'}
               </h1>
-              <div className='flex flex-col items-center gap-4 max-w-xs mx-auto'>
-                <div className='w-full flex items-center gap-2 px-4 py-2 rounded-lg border' style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
-                  <span className='text-xs font-mono flex-1 truncate' style={{ color: 'rgba(255,255,255,0.35)' }}>
+              <p className='text-sm md:text-base mb-8 leading-relaxed'
+                style={{ color: 'rgba(255,255,255,0.35)' }}
+              >
+                {isChinese
+                  ? '一套密钥打通 OpenAI、Claude、Gemini 等主流模型，即插即用'
+                  : 'One set of keys for OpenAI, Claude, Gemini, and more. Plug and play.'}
+              </p>
+              <div className='flex flex-col items-center gap-4'>
+                <div className='w-full flex items-center gap-2 px-4 py-2.5 rounded-xl border'
+                  style={{
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.04)',
+                    backdropFilter: 'blur(12px)',
+                  }}
+                >
+                  <span className='text-sm font-mono flex-1 truncate text-center'
+                    style={{ color: 'rgba(255,255,255,0.45)' }}
+                  >
                     {serverAddress}
                   </span>
-                  <button onClick={handleCopyBaseURL} className='flex-shrink-0 w-6 h-6 flex items-center justify-center rounded' style={{ color: 'rgba(255,255,255,0.25)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.25)'; e.currentTarget.style.background = 'transparent'; }}>
-                    <IconCopy size={14} />
+                  <button
+                    onClick={handleCopyBaseURL}
+                    className='flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-all duration-200'
+                    style={{ color: 'rgba(255,255,255,0.3)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <IconCopy size={15} />
                   </button>
                 </div>
                 <Link to='/console' className='w-full'>
@@ -138,9 +162,9 @@ const Home = () => {
                     size='large'
                     className='kye-btn kye-btn-primary'
                     icon={<IconKey />}
-                    style={{ height: 44, fontSize: 14, letterSpacing: '0.05em' }}
+                    style={{ height: 46, fontSize: 15, borderRadius: 12, letterSpacing: '0.03em' }}
                   >
-                    {t('进入控制台')}
+                    {t('免费使用')}
                   </Button>
                 </Link>
               </div>
