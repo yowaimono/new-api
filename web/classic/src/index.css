@@ -1046,3 +1046,279 @@ html.dark .with-pastel-balls::before {
 }
 
 .ec-dbcd0a3c01b55203 { forced-color-adjust: auto; }
+
+/* ==================== KyeAI Theme (Light/Dark) ==================== */
+:root {
+  --kye-bg: linear-gradient(135deg, #f5f6fa, #eef0f5, #f0f2f6);
+  --kye-bg-solid: #f0f2f6;
+  --kye-card-bg: rgba(255, 255, 255, 0.75);
+  --kye-card-border: rgba(0, 0, 0, 0.08);
+  --kye-card-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+  --kye-text: #1a1a2e;
+  --kye-text-dim: rgba(0, 0, 0, 0.45);
+  --kye-text-muted: rgba(0, 0, 0, 0.25);
+  --kye-border: rgba(0, 0, 0, 0.08);
+  --kye-border-hover: rgba(0, 0, 0, 0.12);
+  --kye-surface: rgba(0, 0, 0, 0.03);
+  --kye-surface-hover: rgba(0, 0, 0, 0.06);
+}
+
+body[theme-mode="dark"] {
+  --kye-bg: linear-gradient(135deg, #07070e, #0d0d1a, #0a0a14);
+  --kye-bg-solid: #0a0a14;
+  --kye-card-bg: rgba(255, 255, 255, 0.03);
+  --kye-card-border: rgba(255, 255, 255, 0.06);
+  --kye-card-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --kye-text: #e0e0e0;
+  --kye-text-dim: rgba(255, 255, 255, 0.35);
+  --kye-text-muted: rgba(255, 255, 255, 0.15);
+  --kye-border: rgba(255, 255, 255, 0.08);
+  --kye-border-hover: rgba(0, 212, 255, 0.2);
+  --kye-surface: rgba(255, 255, 255, 0.03);
+  --kye-surface-hover: rgba(255, 255, 255, 0.06);
+}
+
+.kye-bg {
+  min-height: 100vh;
+  background: var(--kye-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kye-glass-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 32px;
+  background: var(--kye-card-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 16px;
+  border: 1px solid var(--kye-card-border);
+  box-shadow: var(--kye-card-shadow);
+}
+
+.kye-glass-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), transparent 40%, transparent 60%, rgba(123, 47, 247, 0.25));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.kye-brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.kye-brand-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  object-fit: cover;
+  margin-bottom: 10px;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.kye-brand-name {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #00d4ff, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.kye-card-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--kye-text);
+  margin-bottom: 24px;
+  letter-spacing: 1px;
+}
+
+.kye-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 20px 0;
+  color: var(--kye-text-muted);
+  font-size: 12px;
+}
+
+.kye-divider::before,
+.kye-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--kye-border), transparent);
+}
+
+.kye-btn {
+  width: 100% !important;
+  height: 46px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  transition: all 0.25s ease !important;
+}
+
+.kye-btn-primary {
+  background: linear-gradient(135deg, #00d4ff, #7b2ff7) !important;
+  border: none !important;
+  color: #fff !important;
+}
+
+.kye-btn-primary:hover {
+  opacity: 0.92 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 24px rgba(0, 212, 255, 0.25) !important;
+}
+
+.kye-btn-outline {
+  background: var(--kye-surface) !important;
+  border: 1px solid var(--kye-border) !important;
+  color: var(--kye-text-dim) !important;
+}
+
+.kye-btn-outline:hover {
+  background: var(--kye-surface-hover) !important;
+  border-color: rgba(0, 212, 255, 0.2) !important;
+  color: var(--kye-text) !important;
+}
+
+.kye-btn-oauth {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  height: 46px !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  background: var(--kye-surface) !important;
+  border: 1px solid var(--kye-border) !important;
+  color: var(--kye-text-dim) !important;
+  transition: all 0.25s ease !important;
+}
+
+.kye-btn-oauth:hover {
+  background: var(--kye-surface-hover) !important;
+  border-color: rgba(0, 212, 255, 0.15) !important;
+  color: var(--kye-text) !important;
+  transform: translateY(-1px);
+}
+
+.kye-input .semi-input-wrapper {
+  background: var(--kye-surface) !important;
+  border: 1px solid var(--kye-border) !important;
+  border-radius: 10px !important;
+  transition: all 0.25s ease !important;
+}
+
+.kye-input .semi-input-wrapper:focus-within {
+  border-color: rgba(0, 212, 255, 0.3) !important;
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.06) !important;
+}
+
+.kye-input .semi-input {
+  background: transparent !important;
+  color: var(--kye-text) !important;
+  font-size: 14px !important;
+}
+
+.kye-input .semi-input-prefix {
+  color: var(--kye-text-muted) !important;
+}
+
+.kye-input label {
+  color: var(--kye-text-dim) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.kye-link {
+  color: rgba(0, 212, 255, 0.6) !important;
+  font-size: 13px !important;
+  transition: all 0.2s ease !important;
+}
+
+.kye-link:hover {
+  color: rgba(0, 212, 255, 0.9) !important;
+}
+
+.kye-text {
+  color: var(--kye-text-dim) !important;
+  font-size: 13px !important;
+}
+
+.kye-text-light {
+  color: var(--kye-text) !important;
+  font-size: 13px !important;
+}
+
+/* ==================== Home Page ==================== */
+.kye-hero {
+  background: var(--kye-bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.kye-hero-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  color: var(--kye-text);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.kye-hero-sub {
+  font-size: 15px;
+  color: var(--kye-text-dim);
+  line-height: 1.6;
+}
+
+.kye-hero-url {
+  max-width: 480px;
+  width: 100%;
+}
+
+.kye-hero-url .semi-input-wrapper {
+  background: var(--kye-surface) !important;
+  border: 1px solid var(--kye-border) !important;
+  border-radius: 12px !important;
+}
+
+.kye-hero-url .semi-input {
+  color: var(--kye-text) !important;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace !important;
+  font-size: 13px !important;
+}
+
+.kye-provider-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--kye-surface);
+  border: 1px solid var(--kye-border);
+  padding: 6px;
+  transition: all 0.25s ease;
+}
+
+.kye-provider-icon:hover {
+  border-color: rgba(0, 212, 255, 0.15);
+  background: var(--kye-surface-hover);
+  transform: translateY(-2px);
+}

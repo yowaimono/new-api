@@ -191,7 +191,7 @@
     "Logo 图片地址": "ロゴ画像URL",
     "Midjourney 任务记录": "Midjourneyタスク履歴",
     "MIT许可证": "MITライセンス",
-    "New API项目仓库地址：": "New APIプロジェクトリポジトリ：",
+    "New API项目仓库地址：": "KyeAIプロジェクトリポジトリ：",
     "NewAPI 默认不会将入口请求的 User-Agent 透传到上游渠道；该条件仅用于识别访问本站点的客户端。": "NewAPIはデフォルトでは入力リクエストのUser-Agentを上流チャネルにパススルーしません。この条件はこのサイトにアクセスするクライアントの識別にのみ使用されます。",
     "OAuth Client ID": "OAuth Client ID",
     "OAuth Client Secret": "OAuth Client Secret",

@@ -62,7 +62,7 @@ func GetStatus(c *gin.Context) {
 		"telegram_oauth":              common.TelegramOAuthEnabled,
 		"telegram_bot_name":           common.TelegramBotName,
 		"theme":                       system_setting.GetThemeSettings().Frontend,
-		"system_name":                 common.SystemName,
+		"system_name":                 getLocalizedSystemName(c),
 		"logo":                        common.Logo,
 		"footer_html":                 common.Footer,
 		"wechat_qrcode":               common.WeChatAccountQRCodeImageURL,
@@ -366,4 +366,12 @@ func ResetPassword(c *gin.Context) {
 		"data":    password,
 	})
 	return
+}
+
+func getLocalizedSystemName(c *gin.Context) string {
+	lang := c.GetHeader("Accept-Language")
+	if strings.HasPrefix(lang, "zh") {
+		return "灵界中转"
+	}
+	return common.SystemName
 }

@@ -29,7 +29,7 @@ import { API, showError, copy, showSuccess } from '../../helpers';
 import { useIsMobile } from '../../hooks/common/useIsMobile';
 import { API_ENDPOINTS } from '../../constants/common.constant';
 import { StatusContext } from '../../context/Status';
-import { useActualTheme } from '../../context/Theme';
+import { useActualTheme, useTheme, useSetTheme } from '../../context/Theme';
 import { marked } from 'marked';
 import { useTranslation } from 'react-i18next';
 import {
@@ -38,6 +38,7 @@ import {
   IconFile,
   IconCopy,
 } from '@douyinfe/semi-icons';
+import { Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NoticeModal from '../../components/layout/NoticeModal';
 import {
@@ -69,6 +70,8 @@ const Home = () => {
   const { t, i18n } = useTranslation();
   const [statusState] = useContext(StatusContext);
   const actualTheme = useActualTheme();
+  const theme = useTheme();
+  const setTheme = useSetTheme();
   const [homePageContentLoaded, setHomePageContentLoaded] = useState(false);
   const [homePageContent, setHomePageContent] = useState('');
   const [noticeVisible, setNoticeVisible] = useState(false);
@@ -149,7 +152,27 @@ const Home = () => {
   }, [endpointItems.length]);
 
   return (
-    <div className='classic-page-fill classic-home-page w-full overflow-x-hidden'>
+    <>
+      <button
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        className='fixed top-4 right-4 z-50 w-9 h-9 flex items-center justify-center rounded-full border transition-all duration-200'
+        style={{
+          background: 'rgba(255,255,255,0.05)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          color: 'rgba(255,255,255,0.6)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+          e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+          e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
+        }}
+      >
+        <Sun size={16} />
+      </button>
+      <div className='classic-page-fill classic-home-page w-full min-h-[calc(100vh-64px)] overflow-x-hidden'>
       <NoticeModal
         visible={noticeVisible}
         onClose={() => setNoticeVisible(false)}
@@ -158,32 +181,25 @@ const Home = () => {
       {homePageContentLoaded && homePageContent === '' ? (
         <div className='classic-home-default w-full overflow-x-hidden'>
           {/* Banner 部分 */}
-          <div className='classic-home-hero w-full border-b border-semi-color-border relative overflow-x-hidden'>
-            {/* 背景模糊晕染球 */}
-            <div className='blur-ball blur-ball-indigo' />
-            <div className='blur-ball blur-ball-teal' />
-            <div className='flex items-center justify-center px-4 pt-24 pb-8'>
-              {/* 居中内容区 */}
+          <div className='kye-hero w-full border-b flex-1' style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+            <div className='relative z-10 flex items-center justify-center px-4 pt-24 pb-8 min-h-full'>
               <div className='flex flex-col items-center justify-center text-center max-w-4xl mx-auto'>
                 <div className='flex flex-col items-center justify-center mb-6 md:mb-8'>
-                  <h1
-                    className={`text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-semi-color-text-0 leading-tight ${isChinese ? 'tracking-wide md:tracking-wider' : ''}`}
-                  >
+                  <h1 className={`kye-hero-title ${isChinese ? 'tracking-wide md:tracking-wider' : ''}`}>
                     <>
                       {t('统一的')}
                       <br />
-                      <span className='shine-text'>{t('大模型接口网关')}</span>
+                      <span className='kye-gradient-text'>{t('大模型接口网关')}</span>
                     </>
                   </h1>
-                  <p className='text-base md:text-lg lg:text-xl text-semi-color-text-1 mt-4 md:mt-6 max-w-xl'>
+                  <p className='kye-hero-sub mt-4 md:mt-6 max-w-xl'>
                     {t('多模型统一接入，只需将基址替换为：')}
                   </p>
-                  {/* BASE URL 与端点选择 */}
-                  <div className='flex flex-col md:flex-row items-center justify-center gap-4 w-full mt-4 md:mt-6 max-w-md'>
+                  <div className='kye-hero-url flex flex-col md:flex-row items-center justify-center gap-4 w-full mt-4 md:mt-6 max-w-md'>
                     <Input
                       readonly
                       value={serverAddress}
-                      className='flex-1 !rounded-full'
+                      className='flex-1'
                       size={isMobile ? 'default' : 'large'}
                       suffix={
                         <div className='flex items-center gap-2'>
@@ -200,10 +216,10 @@ const Home = () => {
                             />
                           </ScrollList>
                           <Button
-                            type='primary'
+                            className='kye-btn kye-btn-primary'
                             onClick={handleCopyBaseURL}
                             icon={<IconCopy />}
-                            className='!rounded-full'
+                            style={{ height: 36, width: 36, borderRadius: 8 }}
                           />
                         </div>
                       }
@@ -211,14 +227,11 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* 操作按钮 */}
                 <div className='flex flex-row gap-4 justify-center items-center'>
                   <Link to='/console'>
                     <Button
-                      theme='solid'
-                      type='primary'
+                      className='kye-btn kye-btn-primary'
                       size={isMobile ? 'default' : 'large'}
-                      className='!rounded-3xl px-8 py-2'
                       icon={<IconPlay />}
                     >
                       {t('获取密钥')}
@@ -226,8 +239,8 @@ const Home = () => {
                   </Link>
                   {isDemoSiteMode && statusState?.status?.version ? (
                     <Button
+                      className='kye-btn kye-btn-outline'
                       size={isMobile ? 'default' : 'large'}
-                      className='flex items-center !rounded-3xl px-6 py-2'
                       icon={<IconGithubLogo />}
                       onClick={() =>
                         window.open(
@@ -241,8 +254,8 @@ const Home = () => {
                   ) : (
                     docsLink && (
                       <Button
+                        className='kye-btn kye-btn-outline'
                         size={isMobile ? 'default' : 'large'}
-                        className='flex items-center !rounded-3xl px-6 py-2'
                         icon={<IconFile />}
                         onClick={() => window.open(docsLink, '_blank')}
                       >
@@ -252,79 +265,75 @@ const Home = () => {
                   )}
                 </div>
 
-                {/* 框架兼容性图标 */}
                 <div className='mt-12 md:mt-16 lg:mt-20 w-full'>
                   <div className='flex items-center mb-6 md:mb-8 justify-center'>
-                    <Text
-                      type='tertiary'
-                      className='text-lg md:text-xl lg:text-2xl font-light'
-                    >
+                    <Text className='kye-hero-sub'>
                       {t('支持众多的大模型供应商')}
                     </Text>
                   </div>
                   <div className='flex flex-wrap items-center justify-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 max-w-5xl mx-auto px-4'>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Moonshot size={40} />
+                    <div className='kye-provider-icon'>
+                      <Moonshot size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <OpenAI size={40} />
+                    <div className='kye-provider-icon'>
+                      <OpenAI size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <XAI size={40} />
+                    <div className='kye-provider-icon'>
+                      <XAI size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Zhipu.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Zhipu.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Volcengine.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Volcengine.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Cohere.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Cohere.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Claude.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Claude.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Gemini.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Gemini.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Suno size={40} />
+                    <div className='kye-provider-icon'>
+                      <Suno size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Minimax.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Minimax.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Wenxin.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Wenxin.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Spark.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Spark.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Qingyan.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Qingyan.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <DeepSeek.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <DeepSeek.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Qwen.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Qwen.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Midjourney size={40} />
+                    <div className='kye-provider-icon'>
+                      <Midjourney size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Grok size={40} />
+                    <div className='kye-provider-icon'>
+                      <Grok size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <AzureAI.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <AzureAI.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Hunyuan.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Hunyuan.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Xinference.Color size={40} />
+                    <div className='kye-provider-icon'>
+                      <Xinference.Color size={24} />
                     </div>
-                    <div className='w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center'>
-                      <Typography.Text className='!text-lg sm:!text-xl md:!text-2xl lg:!text-3xl font-bold'>
+                    <div className='kye-provider-icon'>
+                      <Typography.Text className='!text-sm font-bold' style={{ color: 'rgba(255,255,255,0.5)' }}>
                         30+
                       </Typography.Text>
                     </div>
@@ -350,6 +359,7 @@ const Home = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
