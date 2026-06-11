@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React from 'react';
 import SelectableButtonGroup from '../../../common/ui/SelectableButtonGroup';
+import { Tags } from 'lucide-react';
 
 /**
  * 模型标签筛选组件
@@ -95,7 +96,7 @@ const PricingTags = ({
 
   return (
     <SelectableButtonGroup
-      title={t('标签')}
+      title={<><Tags size={14} className='sbg-icon' /> {t('标签')}</>}
       items={items}
       activeValue={filterTag}
       onChange={setFilterTag}

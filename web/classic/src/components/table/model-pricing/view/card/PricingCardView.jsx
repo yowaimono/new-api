@@ -48,10 +48,8 @@ import { useIsMobile } from '../../../../../hooks/common/useIsMobile';
 
 const CARD_STYLES = {
   container:
-    'w-12 h-12 rounded-2xl flex items-center justify-center relative shadow-md',
-  icon: 'w-8 h-8 flex items-center justify-center',
-  selected: 'border-blue-500 bg-blue-50',
-  default: 'border-gray-200 hover:border-gray-300',
+    'w-9 h-9 rounded-xl flex items-center justify-center relative',
+  icon: 'w-6 h-6 flex items-center justify-center',
 };
 
 const PricingCardView = ({
@@ -132,13 +130,15 @@ const PricingCardView = ({
     return (
       <div className={CARD_STYLES.container}>
         <Avatar
-          size='large'
+          size='small'
           style={{
-            width: 48,
-            height: 48,
-            borderRadius: 16,
-            fontSize: 16,
-            fontWeight: 'bold',
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            fontSize: 13,
+            fontWeight: 600,
+            background: 'rgba(99,91,255,0.15)',
+            color: '#8A85FF',
           }}
         >
           {avatarText}
@@ -154,40 +154,25 @@ const PricingCardView = ({
 
   // 渲染标签
   const renderTags = (record) => {
-    // 计费类型标签（左边）
     let billingTag = (
-      <Tag key='billing' shape='circle' color='white' size='small'>
-        -
-      </Tag>
+      <span className='kye-neon-tag'>-</span>
     );
     if (record.quota_type === 1) {
       billingTag = (
-        <Tag key='billing' shape='circle' color='teal' size='small'>
-          {t('按次计费')}
-        </Tag>
+        <span className='kye-neon-tag'>{t('按次计费')}</span>
       );
     } else if (record.quota_type === 0) {
       billingTag = (
-        <Tag key='billing' shape='circle' color='violet' size='small'>
-          {t('按量计费')}
-        </Tag>
+        <span className='kye-neon-tag'>{t('按量计费')}</span>
       );
     }
 
-    // 自定义标签（右边）
     const customTags = [];
     if (record.tags) {
       const tagArr = record.tags.split(',').filter(Boolean);
       tagArr.forEach((tg, idx) => {
         customTags.push(
-          <Tag
-            key={`custom-${idx}`}
-            shape='circle'
-            color={stringToColor(tg)}
-            size='small'
-          >
-            {tg}
-          </Tag>,
+          <span key={`custom-${idx}`} className='kye-custom-tag'>{tg}</span>
         );
       });
     }
@@ -235,8 +220,9 @@ const PricingCardView = ({
   }
 
   return (
-    <div className='px-2 pt-2'>
-      <div className='grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4'>
+    <div className='flex flex-col flex-1 min-h-0'>
+      <div className='flex-1 overflow-auto px-2 pt-2'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
         {paginatedModels.map((model, index) => {
           const modelKey = getModelKey(model);
           const isSelected = selectedRowKeys.includes(modelKey);
@@ -252,22 +238,20 @@ const PricingCardView = ({
           });
 
           return (
-            <Card
+            <div
               key={modelKey || index}
-              className={`!rounded-2xl transition-all duration-200 hover:shadow-lg border cursor-pointer ${isSelected ? CARD_STYLES.selected : CARD_STYLES.default}`}
-              bodyStyle={{ height: '100%' }}
+              className={`kye-model-card ${isSelected ? 'selected' : ''}`}
               onClick={() => openModelDetail && openModelDetail(model)}
             >
-              <div className='flex flex-col h-full'>
-                {/* 头部：图标 + 模型名称 + 操作按钮 */}
-                <div className='flex items-start justify-between mb-3'>
-                  <div className='flex items-start space-x-3 flex-1 min-w-0'>
+              <div className='flex flex-col relative z-10 gap-2'>
+                <div className='flex items-start justify-between'>
+                  <div className='flex items-start space-x-2.5 flex-1 min-w-0'>
                     {getModelIcon(model)}
                     <div className='flex-1 min-w-0'>
-                      <h3 className='text-lg font-bold text-gray-900 truncate'>
+                      <h3 className='text-sm font-semibold truncate' style={{ color: 'rgba(255,255,255,0.85)' }}>
                         {model.model_name}
                       </h3>
-                      <div className='flex flex-col gap-1 text-xs mt-1'>
+                      <div className='text-xs mt-0.5' style={{ color: 'rgba(255,255,255,0.35)' }}>
                         {priceData.isDynamicPricing ? (
                           formatDynamicPriceSummary(priceData.billingExpr, t, priceData.usedGroupRatio)
                         ) : (
@@ -277,20 +261,26 @@ const PricingCardView = ({
                     </div>
                   </div>
 
-                  <div className='flex items-center space-x-2 ml-3'>
-                    {/* 复制按钮 */}
+                  <div className='flex items-center space-x-1.5 ml-2 flex-shrink-0'>
                     <Button
                       size='small'
-                      theme='outline'
                       type='tertiary'
-                      icon={<Copy size={12} />}
+                      icon={<Copy size={11} />}
+                      style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.35)',
+                        borderRadius: 6,
+                        width: 26,
+                        height: 26,
+                        minWidth: 26,
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         copyText(model.model_name);
                       }}
                     />
 
-                    {/* 选择框 */}
                     {rowSelection && (
                       <Checkbox
                         checked={isSelected}
@@ -303,34 +293,31 @@ const PricingCardView = ({
                   </div>
                 </div>
 
-                {/* 模型描述 - 占据剩余空间 */}
-                <div className='flex-1 mb-4'>
+                <div>
                   <p
-                    className='text-xs line-clamp-2 leading-relaxed'
-                    style={{ color: 'var(--semi-color-text-2)' }}
+                    className='text-xs line-clamp-1 leading-relaxed'
+                    style={{ color: 'rgba(255,255,255,0.25)' }}
                   >
                     {getModelDescription(model)}
                   </p>
                 </div>
 
-                {/* 底部区域 */}
-                <div className='mt-auto'>
-                  {/* 标签区域 */}
+                <div>
                   {renderTags(model)}
 
-                  {/* 倍率信息（可选） */}
                   {showRatio && (
-                    <div className='pt-3'>
+                    <div className='pt-2 mt-2 border-t' style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
                       <div className='flex items-center space-x-1 mb-2'>
-                        <span className='text-xs font-medium text-gray-700'>
+                        <span className='text-xs font-medium' style={{ color: 'rgba(255,255,255,0.4)' }}>
                           {t('倍率信息')}
                         </span>
                         <Tooltip
                           content={t('倍率是为了方便换算不同价格的模型')}
                         >
                           <IconHelpCircle
-                            className='text-blue-500 cursor-pointer'
+                            className='cursor-pointer'
                             size='small'
+                            style={{ color: 'rgba(255,255,255,0.3)' }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setModalImageUrl('/ratio.png');
@@ -339,7 +326,7 @@ const PricingCardView = ({
                           />
                         </Tooltip>
                       </div>
-                      <div className='grid grid-cols-3 gap-2 text-xs text-gray-600'>
+                      <div className='grid grid-cols-3 gap-2 text-xs' style={{ color: 'rgba(255,255,255,0.25)' }}>
                         <div>
                           {t('模型')}:{' '}
                           {model.quota_type === 0 ? model.model_ratio : t('无')}
@@ -358,14 +345,15 @@ const PricingCardView = ({
                   )}
                 </div>
               </div>
-            </Card>
+            </div>
           );
         })}
+      </div>
       </div>
 
       {/* 分页 */}
       {filteredModels.length > 0 && (
-        <div className='flex justify-center mt-6 py-4 border-t pricing-pagination-divider'>
+        <div className='flex justify-center py-3 px-2 pricing-pagination-divider' style={{ flexShrink: 0 }}>
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}

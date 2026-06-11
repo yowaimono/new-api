@@ -112,26 +112,33 @@ const Home = () => {
         <NoticeModal visible={noticeVisible} onClose={() => setNoticeVisible(false)} isMobile={isMobile} />
         {homePageContentLoaded && homePageContent === '' ? (
           <div className='flex flex-col items-center justify-center min-h-[calc(100vh-64px)] w-full px-6 relative overflow-hidden'>
-            <div className='absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none'
+            <div className='absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none'
               style={{
-                background: 'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)',
               }}
             />
             <div className='relative z-10 text-center max-w-lg mx-auto'>
-              <h1 className='text-[28px] md:text-[36px] font-semibold leading-tight mb-4 tracking-tight'
+              <h1 className='text-[26px] md:text-[34px] font-semibold leading-tight mb-3 tracking-tight'
                 style={{
-                  color: 'rgba(255,255,255,0.9)',
-                  textShadow: '0 0 40px rgba(99,102,241,0.15)',
+                  color: 'rgba(255,255,255,0.92)',
+                  textShadow: '0 0 40px rgba(139,92,246,0.12)',
                 }}
               >
-                {isChinese ? '一个接口，接驳所有 AI' : 'One API to Connect All AI'}
+                {isChinese ? '灵界：高品质私人 AI 调度中心' : 'Lingjie: High-Quality Private AI Hub'}
               </h1>
-              <p className='text-sm md:text-base mb-8 leading-relaxed'
+              <p className='text-sm md:text-[15px] mb-3 leading-relaxed'
                 style={{ color: 'rgba(255,255,255,0.35)' }}
               >
                 {isChinese
-                  ? '一套密钥打通 OpenAI、Claude、Gemini 等主流模型，即插即用'
-                  : 'One set of keys for OpenAI, Claude, Gemini, and more. Plug and play.'}
+                  ? '一个极简的个人大模型中转服务。无需为每个模型单独配置，统一入口直接打通 30+ 顶尖模型。'
+                  : 'A minimalist personal LLM relay service. One unified entry for 30+ top models, no per-model setup needed.'}
+              </p>
+              <p className='text-[13px] md:text-sm mb-8 leading-relaxed'
+                style={{ color: 'rgba(255,255,255,0.2)' }}
+              >
+                {isChinese
+                  ? '提供稳定、无感的优质调用体验，把精力留给真正重要的事。'
+                  : 'Stable, seamless experience. Focus on what matters.'}
               </p>
               <div className='flex flex-col items-center gap-4'>
                 <div className='w-full flex items-center gap-2 px-4 py-2.5 rounded-xl border'
@@ -156,15 +163,14 @@ const Home = () => {
                     <IconCopy size={15} />
                   </button>
                 </div>
-                <Link to='/console' className='w-full'>
+                <Link to='/login' className='inline-block'>
                   <Button
-                    block
                     size='large'
                     className='kye-btn kye-btn-primary'
                     icon={<IconKey />}
-                    style={{ height: 46, fontSize: 15, borderRadius: 12, letterSpacing: '0.03em' }}
+                    style={{ height: 44, fontSize: 14, borderRadius: 10, letterSpacing: '0.03em', paddingInline: 28 }}
                   >
-                    {t('免费使用')}
+                    {t('开始调用')}
                   </Button>
                 </Link>
               </div>

@@ -24,6 +24,7 @@ import PricingQuotaTypes from '../filter/PricingQuotaTypes';
 import PricingEndpointTypes from '../filter/PricingEndpointTypes';
 import PricingVendors from '../filter/PricingVendors';
 import PricingTags from '../filter/PricingTags';
+import { RotateCcw } from 'lucide-react';
 
 import { resetPricingFilters } from '../../../../helpers/utils';
 import { usePricingFilterCounts } from '../../../../hooks/model-pricing/usePricingFilterCounts';
@@ -91,63 +92,69 @@ const PricingSidebar = ({
     });
 
   return (
-    <div className='p-2'>
-      <div className='flex items-center justify-between mb-6'>
-        <div className='text-lg font-semibold text-gray-800'>{t('筛选')}</div>
-        <Button
-          theme='outline'
-          type='tertiary'
-          onClick={handleResetFilters}
-          className='text-gray-500 hover:text-gray-700'
-        >
-          {t('重置')}
-        </Button>
+    <div className='p-3 h-full'>
+      <div className='kye-model-card h-full p-4' style={{ borderRadius: 16 }}>
+        <div className='flex items-center justify-between mb-1 relative z-10'>
+          <div className='text-sm font-semibold' style={{ color: 'rgba(255,255,255,0.8)' }}>{t('筛选')}</div>
+          <button
+            onClick={handleResetFilters}
+            className='flex items-center gap-1 text-xs transition-colors'
+            style={{ color: '#666' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = '#666'; }}
+          >
+            <RotateCcw size={11} />
+            {t('重置')}
+          </button>
+        </div>
+
+        <div className='overflow-y-auto relative z-10' style={{ maxHeight: 'calc(100vh - 160px)' }}>
+          <PricingVendors
+            filterVendor={filterVendor}
+            setFilterVendor={setFilterVendor}
+            models={vendorModels}
+            allModels={categoryProps.models}
+            loading={loading}
+            t={t}
+          />
+
+          <PricingGroups
+            filterGroup={filterGroup}
+            setFilterGroup={handleGroupClick}
+            usableGroup={categoryProps.usableGroup}
+            groupRatio={categoryProps.groupRatio}
+            models={groupCountModels}
+            loading={loading}
+            t={t}
+          />
+
+          <PricingQuotaTypes
+            filterQuotaType={filterQuotaType}
+            setFilterQuotaType={setFilterQuotaType}
+            models={quotaTypeModels}
+            loading={loading}
+            t={t}
+          />
+
+          <PricingTags
+            filterTag={filterTag}
+            setFilterTag={setFilterTag}
+            models={tagModels}
+            allModels={categoryProps.models}
+            loading={loading}
+            t={t}
+          />
+
+          <PricingEndpointTypes
+            filterEndpointType={filterEndpointType}
+            setFilterEndpointType={setFilterEndpointType}
+            models={endpointTypeModels}
+            allModels={categoryProps.models}
+            loading={loading}
+            t={t}
+          />
+        </div>
       </div>
-
-      <PricingVendors
-        filterVendor={filterVendor}
-        setFilterVendor={setFilterVendor}
-        models={vendorModels}
-        allModels={categoryProps.models}
-        loading={loading}
-        t={t}
-      />
-
-      <PricingGroups
-        filterGroup={filterGroup}
-        setFilterGroup={handleGroupClick}
-        usableGroup={categoryProps.usableGroup}
-        groupRatio={categoryProps.groupRatio}
-        models={groupCountModels}
-        loading={loading}
-        t={t}
-      />
-
-      <PricingQuotaTypes
-        filterQuotaType={filterQuotaType}
-        setFilterQuotaType={setFilterQuotaType}
-        models={quotaTypeModels}
-        loading={loading}
-        t={t}
-      />
-
-      <PricingTags
-        filterTag={filterTag}
-        setFilterTag={setFilterTag}
-        models={tagModels}
-        allModels={categoryProps.models}
-        loading={loading}
-        t={t}
-      />
-
-      <PricingEndpointTypes
-        filterEndpointType={filterEndpointType}
-        setFilterEndpointType={setFilterEndpointType}
-        models={endpointTypeModels}
-        allModels={categoryProps.models}
-        loading={loading}
-        t={t}
-      />
     </div>
   );
 };

@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React from 'react';
 import SelectableButtonGroup from '../../../common/ui/SelectableButtonGroup';
+import { Folder } from 'lucide-react';
 
 /**
  * 分组筛选组件
@@ -70,7 +71,7 @@ const PricingGroups = ({
 
   return (
     <SelectableButtonGroup
-      title={t('可用令牌分组')}
+      title={<><Folder size={14} className='sbg-icon' /> {t('可用令牌分组')}</>}
       items={items}
       activeValue={filterGroup}
       onChange={setFilterGroup}

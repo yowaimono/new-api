@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React from 'react';
 import SelectableButtonGroup from '../../../common/ui/SelectableButtonGroup';
+import { Terminal } from 'lucide-react';
 
 /**
  * 端点类型筛选组件
@@ -89,7 +90,7 @@ const PricingEndpointTypes = ({
 
   return (
     <SelectableButtonGroup
-      title={t('端点类型')}
+      title={<><Terminal size={14} className='sbg-icon' /> {t('端点类型')}</>}
       items={items}
       activeValue={filterEndpointType}
       onChange={setFilterEndpointType}

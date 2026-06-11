@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React from 'react';
 import SelectableButtonGroup from '../../../common/ui/SelectableButtonGroup';
+import { DollarSign } from 'lucide-react';
 
 /**
  * 计费类型筛选组件
@@ -47,7 +48,7 @@ const PricingQuotaTypes = ({
 
   return (
     <SelectableButtonGroup
-      title={t('计费类型')}
+      title={<><DollarSign size={14} className='sbg-icon' /> {t('计费类型')}</>}
       items={items}
       activeValue={filterQuotaType}
       onChange={setFilterQuotaType}

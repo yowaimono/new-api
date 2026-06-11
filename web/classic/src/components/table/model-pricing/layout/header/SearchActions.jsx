@@ -20,6 +20,7 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { memo, useCallback } from 'react';
 import { Input, Button, Switch, Select, Divider } from '@douyinfe/semi-ui';
 import { IconSearch, IconCopy, IconFilter } from '@douyinfe/semi-icons';
+import { LayoutGrid } from 'lucide-react';
 
 const SearchActions = memo(
   ({
@@ -65,7 +66,7 @@ const SearchActions = memo(
     }, [tokenUnit, setTokenUnit]);
 
     return (
-      <div className='flex items-center gap-2 w-full'>
+      <div className='flex items-center gap-2 w-full pricing-toolbar'>
         <div className='flex-1'>
           <Input
             prefix={<IconSearch />}
@@ -80,11 +81,17 @@ const SearchActions = memo(
 
         <Button
           theme='outline'
-          type='primary'
           icon={<IconCopy />}
           onClick={handleCopyClick}
           disabled={selectedRowKeys.length === 0}
-          className='!bg-blue-500 hover:!bg-blue-600 !text-white disabled:!bg-gray-300 disabled:!text-gray-500'
+          style={{
+            background: selectedRowKeys.length > 0 ? '#5B58EB' : 'transparent',
+            border: selectedRowKeys.length > 0 ? 'none' : '1px solid rgba(255,255,255,0.1)',
+            color: selectedRowKeys.length > 0 ? '#fff' : '#8B949E',
+            borderRadius: 8,
+            fontSize: 12,
+            height: 32,
+          }}
         >
           {t('复制')}
         </Button>
@@ -119,18 +126,24 @@ const SearchActions = memo(
 
             {/* 显示倍率开关 */}
             <div className='flex items-center gap-2'>
-              <span className='text-sm text-gray-600'>{t('倍率')}</span>
+              <span className='text-sm' style={{ color: 'rgba(255,255,255,0.45)' }}>{t('倍率')}</span>
               <Switch checked={showRatio} onChange={setShowRatio} />
             </div>
 
             {/* 视图模式切换按钮 */}
             <Button
-              theme={viewMode === 'table' ? 'solid' : 'outline'}
-              type={viewMode === 'table' ? 'primary' : 'tertiary'}
+              theme='outline'
+              icon={<LayoutGrid size={16} />}
               onClick={handleViewModeToggle}
-            >
-              {t('表格视图')}
-            </Button>
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#8B949E',
+                borderRadius: 8,
+                width: 32,
+                height: 32,
+              }}
+            />
 
             {/* Token单位切换按钮 */}
             <Button

@@ -37,28 +37,20 @@ const CONFIG = {
   UNKNOWN_VENDOR: 'unknown',
 };
 
-const THEME_COLORS = {
-  allVendors: {
-    primary: '37 99 235',
-    background: 'rgba(59, 130, 246, 0.08)',
-  },
-  specific: {
-    primary: '16 185 129',
-    background: 'rgba(16, 185, 129, 0.1)',
-  },
-};
-
 const COMPONENT_STYLES = {
   tag: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    color: '#1f2937',
-    border: '1px solid rgba(255,255,255,0.8)',
+    background: 'rgba(99, 91, 255, 0.15)',
+    color: '#8A85FF',
+    border: '1px solid rgba(99, 91, 255, 0.4)',
     fontWeight: '500',
+    borderRadius: 6,
+    fontSize: 12,
+    padding: '2px 8px',
   },
   avatarContainer:
-    'w-16 h-16 rounded-2xl bg-white/90 shadow-md backdrop-blur-sm flex items-center justify-center',
-  titleText: { color: 'white' },
-  descriptionText: { color: 'rgba(255,255,255,0.9)' },
+    'w-14 h-14 rounded-2xl flex items-center justify-center',
+  titleText: { color: 'rgba(255,255,255,0.9)', fontWeight: 600, fontSize: 18 },
+  descriptionText: { color: 'rgba(255,255,255,0.4)', fontSize: 13 },
 };
 
 const CONTENT_TEXTS = {
@@ -94,8 +86,8 @@ const createDefaultAvatar = () => (
 
 const getAvatarBackgroundColor = (isAllVendors) =>
   isAllVendors
-    ? THEME_COLORS.allVendors.background
-    : THEME_COLORS.specific.background;
+    ? 'rgba(139,92,246,0.12)'
+    : 'rgba(99,102,241,0.15)';
 
 const getAvatarText = (vendorName) =>
   vendorName === CONFIG.UNKNOWN_VENDOR
@@ -259,17 +251,6 @@ const PricingVendorIntro = memo(
       [vendorInfo, t],
     );
 
-    const createCoverStyle = useCallback(
-      (primaryColor) => ({
-        '--palette-primary-darkerChannel': primaryColor,
-        backgroundImage: `linear-gradient(0deg, rgba(var(--palette-primary-darkerChannel) / 80%), rgba(var(--palette-primary-darkerChannel) / 80%)), url('/cover-4.webp')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }),
-      [],
-    );
-
     const renderSearchActions = useCallback(
       () => (
         <SearchActions
@@ -318,51 +299,28 @@ const PricingVendorIntro = memo(
     );
 
     const renderHeaderCard = useCallback(
-      ({ title, count, description, rightContent, primaryDarkerChannel }) => (
-        <Card
-          className='!rounded-2xl shadow-sm border-0'
-          cover={
-            <div
-              className='relative h-full'
-              style={createCoverStyle(primaryDarkerChannel)}
-            >
-              <div className='relative z-10 h-full flex items-center justify-between p-4'>
-                <div className='flex-1 min-w-0 mr-4'>
-                  <div className='flex flex-row flex-wrap items-center gap-2 sm:gap-3 mb-2'>
-                    <h2
-                      className='text-lg sm:text-xl font-bold truncate'
-                      style={COMPONENT_STYLES.titleText}
-                    >
-                      {title}
-                    </h2>
-                    <Tag
-                      style={COMPONENT_STYLES.tag}
-                      shape='circle'
-                      size='small'
-                      className='self-center'
-                    >
-                      {t('共 {{count}} 个模型', { count })}
-                    </Tag>
-                  </div>
-                  <Paragraph
-                    className='text-xs sm:text-sm leading-relaxed !mb-0 cursor-pointer'
-                    style={COMPONENT_STYLES.descriptionText}
-                    ellipsis={{ rows: 2 }}
-                    onClick={() => handleOpenDescModal(description)}
-                  >
-                    {description}
-                  </Paragraph>
-                </div>
-
-                <div className='flex-shrink-0'>{rightContent}</div>
+      ({ title, count, description, rightContent }) => (
+        <div className='flex items-center justify-between px-4 py-2.5 border-b' style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+          <div className='flex items-center gap-3 min-w-0'>
+            <div>
+              <div className='flex items-center gap-2'>
+                <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: 500 }}>{title}</span>
+                <span style={{
+                  fontSize: 11, color: '#8A85FF', background: 'rgba(99,91,255,0.12)',
+                  border: '1px solid rgba(99,91,255,0.3)', borderRadius: 4, padding: '1px 6px'
+                }}>
+                  {t('共 {{count}} 个模型', { count })}
+                </span>
               </div>
+              <p className='text-xs truncate mt-0.5 cursor-pointer' style={{ color: 'rgba(255,255,255,0.25)' }} onClick={() => handleOpenDescModal(description)}>
+                {description}
+              </p>
             </div>
-          }
-        >
-          {renderSearchActions()}
-        </Card>
+          </div>
+
+        </div>
       ),
-      [renderSearchActions, createCoverStyle, handleOpenDescModal, t],
+      [handleOpenDescModal, t],
     );
 
     const renderAllVendorsAvatar = useCallback(() => {
@@ -379,7 +337,6 @@ const PricingVendorIntro = memo(
         count: currentModelCount,
         description: getVendorDescription('all'),
         rightContent: renderAllVendorsAvatar(),
-        primaryDarkerChannel: THEME_COLORS.allVendors.primary,
       });
       return (
         <>
@@ -402,7 +359,6 @@ const PricingVendorIntro = memo(
       description:
         currentVendor.description || getVendorDescription(currentVendor.name),
       rightContent: renderVendorAvatar(currentVendor, t, false),
-      primaryDarkerChannel: THEME_COLORS.specific.primary,
     });
 
     return (

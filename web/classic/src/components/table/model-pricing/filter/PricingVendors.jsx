@@ -20,6 +20,7 @@ For commercial licensing, please contact support@quantumnous.com
 import React from 'react';
 import SelectableButtonGroup from '../../../common/ui/SelectableButtonGroup';
 import { getLobeHubIcon } from '../../../../helpers';
+import { Users } from 'lucide-react';
 
 /**
  * 供应商筛选组件
@@ -113,7 +114,7 @@ const PricingVendors = ({
 
   return (
     <SelectableButtonGroup
-      title={t('供应商')}
+      title={<><Users size={14} className='sbg-icon' /> {t('供应商')}</>}
       items={items}
       activeValue={filterVendor}
       onChange={setFilterVendor}
