@@ -48,6 +48,7 @@ import {
   Divider,
   Form,
   Icon,
+  Input,
   Modal,
 } from '@douyinfe/semi-ui';
 import Title from '@douyinfe/semi-ui/lib/es/typography/title';
@@ -723,22 +724,20 @@ const LoginForm = () => {
                 <span className='ml-3'>{t('使用 Passkey 登录')}</span>
               </Button>
             )}
-            <Form className='kye-input space-y-4'>
-              <Form.Input
-                field='username'
-                label={null}
+            <div className='kye-input space-y-4'>
+              <Input
                 placeholder={t('用户名或邮箱')}
                 name='username'
+                value={inputs.username}
                 onChange={(value) => handleChange('username', value)}
                 prefix={<IconMail />}
               />
 
-              <Form.Input
-                field='password'
-                label={null}
+              <Input
                 placeholder={t('密码')}
                 name='password'
                 mode='password'
+                value={inputs.password}
                 onChange={(value) => handleChange('password', value)}
                 prefix={<IconLock />}
               />
@@ -800,7 +799,7 @@ const LoginForm = () => {
                   {t('忘记密码？')}
                 </Button>
               </div>
-            </Form>
+            </div>
 
             {hasOAuthLoginOptions && (
               <>
