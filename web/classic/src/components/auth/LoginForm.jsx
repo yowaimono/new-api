@@ -726,7 +726,7 @@ const LoginForm = () => {
             )}
             <div className='kye-input space-y-4'>
               <div className='flex justify-center'>
-                <div style={{ width: '60%' }}>
+                <div style={{ width: '80%' }}>
                   <Input
                     placeholder={t('用户名或邮箱')}
                     name='username'
@@ -738,7 +738,7 @@ const LoginForm = () => {
               </div>
 
               <div className='flex justify-center'>
-                <div style={{ width: '60%' }}>
+                <div style={{ width: '80%' }}>
                   <Input
                     placeholder={t('密码')}
                     name='password'
