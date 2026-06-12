@@ -508,7 +508,7 @@ const LoginForm = () => {
   const renderOAuthOptions = () => {
     return (
       <div className='flex flex-col items-center'>
-        <div className='w-full max-w-md'>
+        <div className='w-full max-w-xs'>
           <div className='flex items-center justify-center mb-6 gap-2'>
             <img src={logo} alt='Logo' className='h-10 rounded-full' />
             <Title heading={3} className='kye-gradient-text'>
@@ -704,7 +704,7 @@ const LoginForm = () => {
   const renderEmailLoginForm = () => {
     return (
       <div className='flex flex-col items-center'>
-        <div className='w-full max-w-md'>
+        <div className='w-full max-w-xs'>
           <div className='flex items-center justify-center mb-6 gap-2'>
             <img src={logo} alt='Logo' className='h-10 rounded-full' />
             <Title heading={3} className='kye-gradient-text'>{systemName}</Title>
@@ -725,22 +725,30 @@ const LoginForm = () => {
               </Button>
             )}
             <div className='kye-input space-y-4'>
-              <Input
-                placeholder={t('用户名或邮箱')}
-                name='username'
-                value={inputs.username}
-                onChange={(value) => handleChange('username', value)}
-                prefix={<IconMail />}
-              />
+              <div className='flex justify-center'>
+                <div style={{ width: '60%' }}>
+                  <Input
+                    placeholder={t('用户名或邮箱')}
+                    name='username'
+                    value={inputs.username}
+                    onChange={(value) => handleChange('username', value)}
+                    prefix={<IconMail />}
+                  />
+                </div>
+              </div>
 
-              <Input
-                placeholder={t('密码')}
-                name='password'
-                mode='password'
-                value={inputs.password}
-                onChange={(value) => handleChange('password', value)}
-                prefix={<IconLock />}
-              />
+              <div className='flex justify-center'>
+                <div style={{ width: '60%' }}>
+                  <Input
+                    placeholder={t('密码')}
+                    name='password'
+                    mode='password'
+                    value={inputs.password}
+                    onChange={(value) => handleChange('password', value)}
+                    prefix={<IconLock />}
+                  />
+                </div>
+              </div>
 
               {(hasUserAgreement || hasPrivacyPolicy) && (
                 <div className='pt-2'>
@@ -776,13 +784,13 @@ const LoginForm = () => {
                 </div>
               )}
 
-              <div className='flex flex-col items-center space-y-1.5 pt-1'>
+              <div className='flex flex-col items-center space-y-3 pt-3'>
                 <Button
                   className='kye-btn kye-btn-primary'
                   htmlType='submit'
                   onClick={handleSubmit}
                   loading={loginLoading}
-                  style={{ width: 140 }}
+                  style={{ width: 120 }}
                   disabled={
                     (hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms
                   }
@@ -794,7 +802,7 @@ const LoginForm = () => {
                   className='kye-btn kye-btn-outline'
                   onClick={handleResetPasswordClick}
                   loading={resetPasswordLoading}
-                  style={{ width: 140 }}
+                  style={{ width: 120 }}
                 >
                   {t('忘记密码？')}
                 </Button>
