@@ -917,23 +917,10 @@ const LoginForm = () => {
   };
 
   return (
-    <div className='min-h-screen bg-[#0a0a0f] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative'>
+    <div className='min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative kye-hero'>
       <button
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className='fixed top-4 right-4 z-50 w-9 h-9 flex items-center justify-center rounded-full border transition-all duration-200'
-        style={{
-          background: 'rgba(255,255,255,0.05)',
-          borderColor: 'rgba(255,255,255,0.1)',
-          color: 'rgba(255,255,255,0.6)',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-          e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-          e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
-        }}
+        className='kye-theme-toggle'
       >
         <Sun size={16} />
       </button>

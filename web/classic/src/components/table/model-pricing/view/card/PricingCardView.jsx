@@ -235,10 +235,10 @@ const PricingCardView = ({
                   <div className='flex items-start space-x-2.5 flex-1 min-w-0'>
                     {getModelIcon(model)}
                     <div className='flex-1 min-w-0'>
-                      <h3 className='text-sm font-semibold truncate' style={{ color: 'rgba(255,255,255,0.85)' }}>
+                      <h3 className='text-sm font-semibold truncate' style={{ color: 'var(--kye-text)' }}>
                         {model.model_name}
                       </h3>
-                      <div className='text-xs mt-0.5' style={{ color: 'rgba(255,255,255,0.35)' }}>
+                      <div className='text-xs mt-0.5' style={{ color: 'var(--kye-text-dim)' }}>
                         {priceData.isDynamicPricing ? (
                           formatDynamicPriceSummary(priceData.billingExpr, t, priceData.usedGroupRatio)
                         ) : (
@@ -254,9 +254,9 @@ const PricingCardView = ({
                       type='tertiary'
                       icon={<Copy size={11} />}
                       style={{
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        color: 'rgba(255,255,255,0.35)',
+                        background: 'var(--kye-surface)',
+                        border: '1px solid var(--kye-border)',
+                        color: 'var(--kye-text-dim)',
                         borderRadius: 6,
                         width: 26,
                         height: 26,
@@ -282,7 +282,7 @@ const PricingCardView = ({
 
                 {getModelDescription(model) && (
                   <div>
-                    <p className='text-[11px] truncate' style={{ color: 'rgba(255,255,255,0.2)' }}>
+                    <p className='text-[11px] truncate' style={{ color: 'var(--kye-text-muted)' }}>
                       {getModelDescription(model)}
                     </p>
                   </div>
@@ -292,9 +292,9 @@ const PricingCardView = ({
                   {renderTags(model)}
 
                   {showRatio && (
-                    <div className='pt-2 mt-2 border-t' style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                    <div className='pt-2 mt-2 border-t' style={{ borderColor: 'var(--kye-border)' }}>
                       <div className='flex items-center space-x-1 mb-2'>
-                        <span className='text-xs font-medium' style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        <span className='text-xs font-medium' style={{ color: 'var(--kye-text-dim)' }}>
                           {t('倍率信息')}
                         </span>
                         <Tooltip
@@ -303,7 +303,7 @@ const PricingCardView = ({
                           <IconHelpCircle
                             className='cursor-pointer'
                             size='small'
-                            style={{ color: 'rgba(255,255,255,0.3)' }}
+                            style={{ color: 'var(--kye-text-muted)' }}
                             onClick={(e) => {
                               e.stopPropagation();
                               setModalImageUrl('/ratio.png');
@@ -312,7 +312,7 @@ const PricingCardView = ({
                           />
                         </Tooltip>
                       </div>
-                      <div className='grid grid-cols-3 gap-2 text-xs' style={{ color: 'rgba(255,255,255,0.25)' }}>
+                      <div className='grid grid-cols-3 gap-2 text-xs' style={{ color: 'var(--kye-text-muted)' }}>
                         <div>
                           {t('模型')}:{' '}
                           {model.quota_type === 0 ? model.model_ratio : t('无')}

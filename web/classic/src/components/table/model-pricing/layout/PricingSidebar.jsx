@@ -95,13 +95,13 @@ const PricingSidebar = ({
     <div className='p-3 h-full'>
       <div className='kye-card p-4' style={{ height: '100%' }}>
         <div className='flex items-center justify-between mb-1 relative z-10'>
-          <div className='text-sm font-semibold' style={{ color: 'rgba(255,255,255,0.8)' }}>{t('筛选')}</div>
+          <div className='text-sm font-semibold' style={{ color: 'var(--kye-text)' }}>{t('筛选')}</div>
           <button
             onClick={handleResetFilters}
             className='flex items-center gap-1 text-xs transition-colors'
-            style={{ color: '#666' }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#666'; }}
+            style={{ color: 'var(--kye-text-dim)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--kye-text)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--kye-text-dim)'; }}
           >
             <RotateCcw size={11} />
             {t('重置')}

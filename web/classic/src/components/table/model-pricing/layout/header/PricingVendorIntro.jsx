@@ -49,8 +49,8 @@ const COMPONENT_STYLES = {
   },
   avatarContainer:
     'w-14 h-14 rounded-2xl flex items-center justify-center',
-  titleText: { color: 'rgba(255,255,255,0.9)', fontWeight: 600, fontSize: 18 },
-  descriptionText: { color: 'rgba(255,255,255,0.4)', fontSize: 13 },
+  titleText: { color: 'var(--kye-text)', fontWeight: 600, fontSize: 18 },
+  descriptionText: { color: 'var(--kye-text-dim)', fontSize: 13 },
 };
 
 const CONTENT_TEXTS = {

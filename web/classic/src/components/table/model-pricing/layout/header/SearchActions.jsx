@@ -120,7 +120,7 @@ const SearchActions = memo(
 
             {/* 显示倍率开关 */}
             <div className='flex items-center gap-2'>
-              <span className='text-sm' style={{ color: 'rgba(255,255,255,0.45)' }}>{t('倍率')}</span>
+              <span className='text-sm' style={{ color: 'var(--kye-text-dim)' }}>{t('倍率')}</span>
               <Switch checked={showRatio} onChange={setShowRatio} />
             </div>
 

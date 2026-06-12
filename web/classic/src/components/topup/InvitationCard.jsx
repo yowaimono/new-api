@@ -96,7 +96,7 @@ const InvitationCard = ({
                 {!complianceConfirmed && (
                   <Text
                     style={{
-                      color: 'rgba(255,255,255,0.8)',
+                      color: 'var(--kye-text-dim)',
                       fontSize: 12,
                     }}
                   >
@@ -110,7 +110,7 @@ const InvitationCard = ({
                   <div className='text-center'>
                     <div
                       className='text-base sm:text-2xl font-bold mb-2'
-                      style={{ color: 'white' }}
+                      style={{ color: 'var(--kye-text)' }}
                     >
                       {renderQuota(userState?.user?.aff_quota || 0)}
                     </div>
@@ -118,11 +118,11 @@ const InvitationCard = ({
                       <TrendingUp
                         size={14}
                         className='mr-1'
-                        style={{ color: 'rgba(255,255,255,0.8)' }}
+                        style={{ color: 'var(--kye-text-dim)' }}
                       />
                       <Text
                         style={{
-                          color: 'rgba(255,255,255,0.8)',
+                          color: 'var(--kye-text-dim)',
                           fontSize: '12px',
                         }}
                       >
@@ -135,7 +135,7 @@ const InvitationCard = ({
                   <div className='text-center'>
                     <div
                       className='text-base sm:text-2xl font-bold mb-2'
-                      style={{ color: 'white' }}
+                      style={{ color: 'var(--kye-text)' }}
                     >
                       {renderQuota(userState?.user?.aff_history_quota || 0)}
                     </div>
@@ -143,11 +143,11 @@ const InvitationCard = ({
                       <BarChart2
                         size={14}
                         className='mr-1'
-                        style={{ color: 'rgba(255,255,255,0.8)' }}
+                        style={{ color: 'var(--kye-text-dim)' }}
                       />
                       <Text
                         style={{
-                          color: 'rgba(255,255,255,0.8)',
+                          color: 'var(--kye-text-dim)',
                           fontSize: '12px',
                         }}
                       >
@@ -160,7 +160,7 @@ const InvitationCard = ({
                   <div className='text-center'>
                     <div
                       className='text-base sm:text-2xl font-bold mb-2'
-                      style={{ color: 'white' }}
+                      style={{ color: 'var(--kye-text)' }}
                     >
                       {userState?.user?.aff_count || 0}
                     </div>
@@ -168,11 +168,11 @@ const InvitationCard = ({
                       <Users
                         size={14}
                         className='mr-1'
-                        style={{ color: 'rgba(255,255,255,0.8)' }}
+                        style={{ color: 'var(--kye-text-dim)' }}
                       />
                       <Text
                         style={{
-                          color: 'rgba(255,255,255,0.8)',
+                          color: 'var(--kye-text-dim)',
                           fontSize: '12px',
                         }}
                       >
