@@ -733,6 +733,7 @@ const LoginForm = () => {
                     value={inputs.username}
                     onChange={(value) => handleChange('username', value)}
                     prefix={<IconMail />}
+                  style={{ height: 48 }}
                   />
                 </div>
               </div>
@@ -746,6 +747,7 @@ const LoginForm = () => {
                     value={inputs.password}
                     onChange={(value) => handleChange('password', value)}
                     prefix={<IconLock />}
+                  style={{ height: 48 }}
                   />
                 </div>
               </div>
