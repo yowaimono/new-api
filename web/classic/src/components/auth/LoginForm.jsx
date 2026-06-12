@@ -782,7 +782,7 @@ const LoginForm = () => {
                   htmlType='submit'
                   onClick={handleSubmit}
                   loading={loginLoading}
-                  style={{ width: '55%' }}
+                  style={{ width: '28%' }}
                   disabled={
                     (hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms
                   }
