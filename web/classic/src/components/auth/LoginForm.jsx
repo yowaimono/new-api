@@ -517,6 +517,7 @@ const LoginForm = () => {
           </div>
 
           <div className='kye-glass-card' style={{ maxWidth: 315 }}>
+            <div style={{ paddingTop: 8 }}>
             <div className='kye-card-title'>
               {t('登 录')}
             </div>
@@ -711,6 +712,7 @@ const LoginForm = () => {
           </div>
 
           <div className='kye-glass-card' style={{ maxWidth: 315 }}>
+            <div style={{ paddingTop: 8 }}>
             <div className='kye-card-title'>
               {t('登 录')}
             </div>
