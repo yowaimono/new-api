@@ -51,6 +51,7 @@ const About = () => {
         />
 
         <div className='relative z-10 text-center mb-12'>
+          <img src='/logo.png' alt='KyeAI' className='w-36 h-36 mx-auto mb-6 object-contain' />
           <div className='mb-4'>
             {isChinese ? (
               <span className='text-3xl font-bold' style={{ background: 'linear-gradient(135deg, #00d4ff, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
