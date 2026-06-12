@@ -794,7 +794,7 @@ const LoginForm = () => {
                   className='kye-btn kye-btn-outline'
                   onClick={handleResetPasswordClick}
                   loading={resetPasswordLoading}
-                  style={{ width: '70%' }}
+                  style={{ width: '60%', height: 36 }}
                 >
                   {t('忘记密码？')}
                 </Button>
