@@ -23,7 +23,7 @@
 /* 隐藏首页和登录页滚动条 */
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 html::-webkit-scrollbar,
