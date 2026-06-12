@@ -19,7 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useState, memo } from 'react';
 import PricingFilterModal from '../../modal/PricingFilterModal';
-import PricingVendorIntroWithSkeleton from './PricingVendorIntroWithSkeleton';
+import PricingVendorIntro from './PricingVendorIntro';
 import SearchActions from './SearchActions';
 
 const PricingTopSection = memo(
@@ -87,8 +87,7 @@ const PricingTopSection = memo(
             />
           </>
         ) : (
-          <PricingVendorIntroWithSkeleton
-            loading={loading}
+          <PricingVendorIntro
             filterVendor={filterVendor}
             models={filteredModels}
             allModels={models}

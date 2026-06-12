@@ -81,17 +81,11 @@ const SearchActions = memo(
 
         <Button
           theme='outline'
+          type='tertiary'
           icon={<IconCopy />}
           onClick={handleCopyClick}
           disabled={selectedRowKeys.length === 0}
-          style={{
-            background: selectedRowKeys.length > 0 ? '#5B58EB' : 'transparent',
-            border: selectedRowKeys.length > 0 ? 'none' : '1px solid rgba(255,255,255,0.1)',
-            color: selectedRowKeys.length > 0 ? '#fff' : '#8B949E',
-            borderRadius: 8,
-            fontSize: 12,
-            height: 32,
-          }}
+          style={{ borderRadius: 8, fontSize: 12, height: 32 }}
         >
           {t('复制')}
         </Button>
@@ -133,16 +127,10 @@ const SearchActions = memo(
             {/* 视图模式切换按钮 */}
             <Button
               theme='outline'
+              type='tertiary'
               icon={<LayoutGrid size={16} />}
               onClick={handleViewModeToggle}
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#8B949E',
-                borderRadius: 8,
-                width: 32,
-                height: 32,
-              }}
+              style={{ borderRadius: 8, width: 32, height: 32 }}
             />
 
             {/* Token单位切换按钮 */}

@@ -519,7 +519,7 @@ const LoginForm = () => {
             <div className='kye-card-title'>
               {t('登 录')}
             </div>
-            <div className='space-y-3'>
+            <div className='space-y-2.5'>
               {status.wechat_login && (
                 <Button
                   className='kye-btn-oauth'
@@ -777,12 +777,13 @@ const LoginForm = () => {
                 </div>
               )}
 
-              <div className='space-y-2 pt-2'>
+              <div className='flex flex-col items-center space-y-1.5 pt-1'>
                 <Button
                   className='kye-btn kye-btn-primary'
                   htmlType='submit'
                   onClick={handleSubmit}
                   loading={loginLoading}
+                  style={{ width: 140 }}
                   disabled={
                     (hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms
                   }
@@ -794,6 +795,7 @@ const LoginForm = () => {
                   className='kye-btn kye-btn-outline'
                   onClick={handleResetPasswordClick}
                   loading={resetPasswordLoading}
+                  style={{ width: 140 }}
                 >
                   {t('忘记密码？')}
                 </Button>

@@ -93,7 +93,7 @@ const PricingSidebar = ({
 
   return (
     <div className='p-3 h-full'>
-      <div className='kye-model-card h-full p-4' style={{ borderRadius: 16 }}>
+      <div className='kye-card p-4' style={{ height: '100%' }}>
         <div className='flex items-center justify-between mb-1 relative z-10'>
           <div className='text-sm font-semibold' style={{ color: 'rgba(255,255,255,0.8)' }}>{t('筛选')}</div>
           <button
@@ -114,7 +114,6 @@ const PricingSidebar = ({
             setFilterVendor={setFilterVendor}
             models={vendorModels}
             allModels={categoryProps.models}
-            loading={loading}
             t={t}
           />
 
@@ -124,7 +123,6 @@ const PricingSidebar = ({
             usableGroup={categoryProps.usableGroup}
             groupRatio={categoryProps.groupRatio}
             models={groupCountModels}
-            loading={loading}
             t={t}
           />
 
@@ -132,7 +130,6 @@ const PricingSidebar = ({
             filterQuotaType={filterQuotaType}
             setFilterQuotaType={setFilterQuotaType}
             models={quotaTypeModels}
-            loading={loading}
             t={t}
           />
 
@@ -141,7 +138,6 @@ const PricingSidebar = ({
             setFilterTag={setFilterTag}
             models={tagModels}
             allModels={categoryProps.models}
-            loading={loading}
             t={t}
           />
 
@@ -150,7 +146,6 @@ const PricingSidebar = ({
             setFilterEndpointType={setFilterEndpointType}
             models={endpointTypeModels}
             allModels={categoryProps.models}
-            loading={loading}
             t={t}
           />
         </div>

@@ -41,8 +41,6 @@ import {
   formatDynamicPriceSummary,
   getLobeHubIcon,
 } from '../../../../../helpers';
-import PricingCardSkeleton from './PricingCardSkeleton';
-import { useMinimumLoadingTime } from '../../../../../hooks/common/useMinimumLoadingTime';
 import { renderLimitedItems } from '../../../../common/ui/RenderUtils';
 import { useIsMobile } from '../../../../../hooks/common/useIsMobile';
 
@@ -75,7 +73,6 @@ const PricingCardView = ({
   setSelectedRowKeys,
   openModelDetail,
 }) => {
-  const showSkeleton = useMinimumLoadingTime(loading);
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedModels = filteredModels.slice(
     startIndex,
@@ -155,15 +152,15 @@ const PricingCardView = ({
   // 渲染标签
   const renderTags = (record) => {
     let billingTag = (
-      <span className='kye-neon-tag'>-</span>
+      <span className='kye-tag'>-</span>
     );
     if (record.quota_type === 1) {
       billingTag = (
-        <span className='kye-neon-tag'>{t('按次计费')}</span>
+        <span className='kye-tag'>{t('按次计费')}</span>
       );
     } else if (record.quota_type === 0) {
       billingTag = (
-        <span className='kye-neon-tag'>{t('按量计费')}</span>
+        <span className='kye-tag'>{t('按量计费')}</span>
       );
     }
 
@@ -172,7 +169,7 @@ const PricingCardView = ({
       const tagArr = record.tags.split(',').filter(Boolean);
       tagArr.forEach((tg, idx) => {
         customTags.push(
-          <span key={`custom-${idx}`} className='kye-custom-tag'>{tg}</span>
+          <span key={`custom-${idx}`} className='kye-tag'>{tg}</span>
         );
       });
     }
@@ -194,16 +191,6 @@ const PricingCardView = ({
       </div>
     );
   };
-
-  // 显示骨架屏
-  if (showSkeleton) {
-    return (
-      <PricingCardSkeleton
-        rowSelection={!!rowSelection}
-        showRatio={showRatio}
-      />
-    );
-  }
 
   if (!filteredModels || filteredModels.length === 0) {
     return (
@@ -240,10 +227,10 @@ const PricingCardView = ({
           return (
             <div
               key={modelKey || index}
-              className={`kye-model-card ${isSelected ? 'selected' : ''}`}
+              className={`kye-card kye-model-card ${isSelected ? 'selected' : ''}`}
               onClick={() => openModelDetail && openModelDetail(model)}
             >
-              <div className='flex flex-col relative z-10 gap-2'>
+              <div className='flex flex-col relative z-10 gap-1.5'>
                 <div className='flex items-start justify-between'>
                   <div className='flex items-start space-x-2.5 flex-1 min-w-0'>
                     {getModelIcon(model)}
@@ -293,14 +280,13 @@ const PricingCardView = ({
                   </div>
                 </div>
 
-                <div>
-                  <p
-                    className='text-xs line-clamp-1 leading-relaxed'
-                    style={{ color: 'rgba(255,255,255,0.25)' }}
-                  >
-                    {getModelDescription(model)}
-                  </p>
-                </div>
+                {getModelDescription(model) && (
+                  <div>
+                    <p className='text-[11px] truncate' style={{ color: 'rgba(255,255,255,0.2)' }}>
+                      {getModelDescription(model)}
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   {renderTags(model)}

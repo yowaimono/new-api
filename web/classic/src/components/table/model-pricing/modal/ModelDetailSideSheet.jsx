@@ -18,10 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { SideSheet, Typography, Button, Divider } from '@douyinfe/semi-ui';
-import { IconClose } from '@douyinfe/semi-icons';
+import { Modal, Typography, Divider } from '@douyinfe/semi-ui';
 
-import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import ModelHeader from './components/ModelHeader';
 import ModelBasicInfo from './components/ModelBasicInfo';
 import ModelEndpoints from './components/ModelEndpoints';
@@ -46,86 +44,71 @@ const ModelDetailSideSheet = ({
   autoGroups,
   t,
 }) => {
-  const isMobile = useIsMobile();
-
   return (
-    <SideSheet
-      placement='right'
+    <Modal
       title={
         <ModelHeader modelData={modelData} vendorsMap={vendorsMap} t={t} />
       }
-      bodyStyle={{
-        padding: '0',
-        display: 'flex',
-        flexDirection: 'column',
-        borderBottom: '1px solid var(--semi-color-border)',
-      }}
       visible={visible}
-      width={isMobile ? '100%' : 600}
-      closeIcon={
-        <Button
-          className='semi-button-tertiary semi-button-size-small semi-button-borderless'
-          type='button'
-          icon={<IconClose />}
-          onClick={onClose}
-        />
-      }
       onCancel={onClose}
+      footer={null}
+      width={620}
+      centered
+      style={{ maxHeight: '80vh' }}
+      bodyStyle={{ padding: 0, overflow: 'auto' }}
     >
-      <div style={{ paddingTop: 16, paddingBottom: 16 }}>
-        {!modelData && (
-          <div className='flex justify-center items-center py-10'>
-            <Text type='secondary'>{t('加载中...')}</Text>
+      {!modelData && (
+        <div className='flex justify-center items-center py-10'>
+          <Text type='secondary'>{t('加载中...')}</Text>
+        </div>
+      )}
+      {modelData && (
+        <div>
+          <div style={{ padding: '0 24px', paddingTop: 16 }}>
+            <ModelBasicInfo
+              modelData={modelData}
+              vendorsMap={vendorsMap}
+              t={t}
+            />
           </div>
-        )}
-        {modelData && (
-          <>
-            <div style={{ padding: '0 24px' }}>
-              <ModelBasicInfo
-                modelData={modelData}
-                vendorsMap={vendorsMap}
-                t={t}
-              />
-            </div>
-            <Divider margin={16} />
-            <div style={{ padding: '0 24px' }}>
-              <ModelEndpoints
-                modelData={modelData}
-                endpointMap={endpointMap}
-                t={t}
-              />
-            </div>
-            {modelData.billing_mode === 'tiered_expr' && modelData.billing_expr && (
-              <>
-                <Divider margin={16} />
-                <div style={{ padding: '0 24px' }}>
-                  <DynamicPricingBreakdown
-                    billingExpr={modelData.billing_expr}
-                    t={t}
-                  />
-                </div>
-              </>
-            )}
-            <Divider margin={16} />
-            <div style={{ padding: '0 24px' }}>
-              <ModelPricingTable
-                modelData={modelData}
-                groupRatio={groupRatio}
-                currency={currency}
-                siteDisplayType={siteDisplayType}
-                tokenUnit={tokenUnit}
-                displayPrice={displayPrice}
-                showRatio={showRatio}
-                usableGroup={usableGroup}
-                autoGroups={autoGroups}
-                t={t}
-              />
-            </div>
-            <Divider margin={16} />
-          </>
-        )}
-      </div>
-    </SideSheet>
+          <Divider margin={16} />
+          <div style={{ padding: '0 24px' }}>
+            <ModelEndpoints
+              modelData={modelData}
+              endpointMap={endpointMap}
+              t={t}
+            />
+          </div>
+          {modelData.billing_mode === 'tiered_expr' && modelData.billing_expr && (
+            <>
+              <Divider margin={16} />
+              <div style={{ padding: '0 24px' }}>
+                <DynamicPricingBreakdown
+                  billingExpr={modelData.billing_expr}
+                  t={t}
+                />
+              </div>
+            </>
+          )}
+          <Divider margin={16} />
+          <div style={{ padding: '0 24px' }}>
+            <ModelPricingTable
+              modelData={modelData}
+              groupRatio={groupRatio}
+              currency={currency}
+              siteDisplayType={siteDisplayType}
+              tokenUnit={tokenUnit}
+              displayPrice={displayPrice}
+              showRatio={showRatio}
+              usableGroup={usableGroup}
+              autoGroups={autoGroups}
+              t={t}
+            />
+          </div>
+          <Divider margin={16} />
+        </div>
+      )}
+    </Modal>
   );
 };
 

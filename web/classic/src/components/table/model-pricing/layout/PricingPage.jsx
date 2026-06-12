@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Layout, ImagePreview } from '@douyinfe/semi-ui';
+import { Layout, ImagePreview, Spin } from '@douyinfe/semi-ui';
 import PricingSidebar from './PricingSidebar';
 import PricingContent from './content/PricingContent';
 import ModelDetailSideSheet from '../modal/ModelDetailSideSheet';
@@ -41,7 +41,7 @@ const PricingPage = () => {
 
   return (
     <div className='pricing-bg'>
-      <Layout className='pricing-layout'>
+      <Layout className='pricing-layout' style={{ position: 'relative' }}>
         {!isMobile && (
           <Sider className='pricing-scroll-hide pricing-sidebar'>
             <PricingSidebar {...allProps} />
@@ -55,6 +55,17 @@ const PricingPage = () => {
             sidebarProps={allProps}
           />
         </Content>
+
+        {pricingData.loading && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--kye-bg)',
+            zIndex: 10,
+          }}>
+            <Spin size='large' />
+          </div>
+        )}
       </Layout>
 
       <ImagePreview

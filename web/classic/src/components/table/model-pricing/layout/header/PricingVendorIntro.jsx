@@ -299,25 +299,21 @@ const PricingVendorIntro = memo(
     );
 
     const renderHeaderCard = useCallback(
-      ({ title, count, description, rightContent }) => (
-        <div className='flex items-center justify-between px-4 py-2.5 border-b' style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+      ({ title, count, description }) => (
+        <div className='flex items-center justify-between px-4 py-2.5 border-b' style={{ borderColor: 'var(--kye-border)' }}>
           <div className='flex items-center gap-3 min-w-0'>
             <div>
               <div className='flex items-center gap-2'>
-                <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: 500 }}>{title}</span>
-                <span style={{
-                  fontSize: 11, color: '#8A85FF', background: 'rgba(99,91,255,0.12)',
-                  border: '1px solid rgba(99,91,255,0.3)', borderRadius: 4, padding: '1px 6px'
-                }}>
+                <span style={{ color: 'var(--kye-text)', fontSize: 14, fontWeight: 500 }}>{title}</span>
+                <span className='kye-tag' style={{ fontSize: 11, padding: '1px 6px' }}>
                   {t('共 {{count}} 个模型', { count })}
                 </span>
               </div>
-              <p className='text-xs truncate mt-0.5 cursor-pointer' style={{ color: 'rgba(255,255,255,0.25)' }} onClick={() => handleOpenDescModal(description)}>
+              <p className='text-xs truncate mt-0.5 cursor-pointer' style={{ color: 'var(--kye-text-dim)' }} onClick={() => handleOpenDescModal(description)}>
                 {description}
               </p>
             </div>
           </div>
-
         </div>
       ),
       [handleOpenDescModal, t],
@@ -336,7 +332,6 @@ const PricingVendorIntro = memo(
         title: t('全部供应商'),
         count: currentModelCount,
         description: getVendorDescription('all'),
-        rightContent: renderAllVendorsAvatar(),
       });
       return (
         <>
@@ -358,7 +353,6 @@ const PricingVendorIntro = memo(
       count: currentModelCount,
       description:
         currentVendor.description || getVendorDescription(currentVendor.name),
-      rightContent: renderVendorAvatar(currentVendor, t, false),
     });
 
     return (

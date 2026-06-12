@@ -32,7 +32,7 @@ const PricingCardSkeleton = ({
         {Array.from({ length: skeletonCount }).map((_, index) => (
           <div
             key={index}
-            className='kye-model-card'
+            className='kye-card kye-model-card'
           >
             <div className='flex flex-col relative z-10'>
               <div className='flex items-start justify-between mb-3'>
