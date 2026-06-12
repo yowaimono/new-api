@@ -1490,6 +1490,85 @@ body[theme-mode="dark"] {
   font-size: 13px !important;
 }
 
+.kye-hero-glow {
+  position: absolute;
+  top: 33%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+}
+
+html:not(.dark) .kye-hero-glow {
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+}
+
+.kye-hero-url-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--kye-border);
+  background: var(--kye-card-bg);
+  backdrop-filter: blur(12px);
+}
+
+.kye-hero-url-text {
+  flex: 1;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  font-size: 14px;
+  text-align: center;
+  color: var(--kye-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kye-hero-copy-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--kye-text-muted);
+  transition: all 0.2s;
+}
+
+.kye-hero-copy-btn:hover {
+  color: var(--kye-text);
+  background: var(--kye-surface-hover);
+}
+
+.kye-theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 50;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--kye-border);
+  background: var(--kye-card-bg);
+  color: var(--kye-text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.kye-theme-toggle:hover {
+  background: var(--kye-surface-hover);
+  color: var(--kye-text);
+}
+
 .kye-provider-icon {
   width: 44px;
   height: 44px;

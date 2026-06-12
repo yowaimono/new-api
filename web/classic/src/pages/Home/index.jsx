@@ -97,68 +97,41 @@ const Home = () => {
     <>
       <button
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className='fixed top-4 right-4 z-50 w-9 h-9 flex items-center justify-center rounded-full border'
-        style={{
-          background: 'rgba(255,255,255,0.05)',
-          borderColor: 'rgba(255,255,255,0.1)',
-          color: 'rgba(255,255,255,0.6)',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.9)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+        className='kye-theme-toggle'
       >
         <Sun size={16} />
       </button>
       <div className='classic-page-fill classic-home-page w-full overflow-x-hidden'>
         <NoticeModal visible={noticeVisible} onClose={() => setNoticeVisible(false)} isMobile={isMobile} />
         {homePageContentLoaded && homePageContent === '' ? (
-          <div className='flex flex-col items-center justify-center min-h-[calc(100vh-64px)] w-full px-6 relative overflow-hidden'>
-            <div className='absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none'
-              style={{
-                background: 'radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)',
-              }}
-            />
+          <div className='flex flex-col items-center justify-center min-h-[calc(100vh-64px)] w-full px-6 relative overflow-hidden kye-hero'>
+            <div className='kye-hero-glow' />
             <div className='relative z-10 text-center max-w-lg mx-auto'>
-              <h1 className='text-[26px] md:text-[34px] font-semibold leading-tight mb-3 tracking-tight'
-                style={{
-                  color: 'rgba(255,255,255,0.92)',
-                  textShadow: '0 0 40px rgba(139,92,246,0.12)',
-                }}
+              <h1 className='kye-hero-title text-[26px] md:text-[34px] mb-3'
+                style={{ textShadow: '0 0 40px rgba(139,92,246,0.12)' }}
               >
                 {isChinese ? '灵界：高品质私人 AI 调度中心' : 'Lingjie: High-Quality Private AI Hub'}
               </h1>
-              <p className='text-sm md:text-[15px] mb-3 leading-relaxed'
-                style={{ color: 'rgba(255,255,255,0.35)' }}
-              >
+              <p className='kye-hero-sub text-sm md:text-[15px] mb-3'>
                 {isChinese
                   ? '一个极简的个人大模型中转服务。无需为每个模型单独配置，统一入口直接打通 30+ 顶尖模型。'
                   : 'A minimalist personal LLM relay service. One unified entry for 30+ top models, no per-model setup needed.'}
               </p>
               <p className='text-[13px] md:text-sm mb-8 leading-relaxed'
-                style={{ color: 'rgba(255,255,255,0.2)' }}
+                style={{ color: 'var(--kye-text-muted)' }}
               >
                 {isChinese
                   ? '提供稳定、无感的优质调用体验，把精力留给真正重要的事。'
                   : 'Stable, seamless experience. Focus on what matters.'}
               </p>
               <div className='flex flex-col items-center gap-4'>
-                <div className='w-full flex items-center gap-2 px-4 py-2.5 rounded-xl border'
-                  style={{
-                    borderColor: 'rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.04)',
-                    backdropFilter: 'blur(12px)',
-                  }}
-                >
-                  <span className='text-sm font-mono flex-1 truncate text-center'
-                    style={{ color: 'rgba(255,255,255,0.45)' }}
-                  >
+                <div className='kye-hero-url-card'>
+                  <span className='kye-hero-url-text'>
                     {serverAddress}
                   </span>
                   <button
                     onClick={handleCopyBaseURL}
-                    className='flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-all duration-200'
-                    style={{ color: 'rgba(255,255,255,0.3)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'transparent'; }}
+                    className='kye-hero-copy-btn'
                   >
                     <IconCopy size={15} />
                   </button>
