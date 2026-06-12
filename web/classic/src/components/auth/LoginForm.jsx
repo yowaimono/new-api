@@ -516,7 +516,7 @@ const LoginForm = () => {
             </Title>
           </div>
 
-          <div className='kye-glass-card' style={{ maxWidth: 315 }}>
+          <div className='kye-glass-card' style={{ maxWidth: 315, paddingTop: 44, paddingBottom: 44 }}>
             <div style={{ paddingTop: 8 }}>
             <div className='kye-card-title'>
               {t('登 录')}
@@ -711,7 +711,7 @@ const LoginForm = () => {
             <Title heading={3} className='kye-gradient-text'>{systemName}</Title>
           </div>
 
-          <div className='kye-glass-card' style={{ maxWidth: 315 }}>
+          <div className='kye-glass-card' style={{ maxWidth: 315, paddingTop: 44, paddingBottom: 44 }}>
             <div style={{ paddingTop: 8 }}>
             <div className='kye-card-title'>
               {t('登 录')}
