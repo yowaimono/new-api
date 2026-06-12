@@ -923,7 +923,7 @@ const LoginForm = () => {
       >
         <Sun size={16} />
       </button>
-      <div className='w-full max-w-md mt-[60px]'>
+      <div className='w-full max-w-md'>
         {showEmailLogin ||
         !hasOAuthLoginOptions
           ? renderEmailLoginForm()
