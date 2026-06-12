@@ -107,7 +107,7 @@ const Home = () => {
           <div className='flex flex-col items-center justify-center min-h-[calc(100vh-64px)] w-full px-6 relative overflow-hidden kye-hero'>
             <div className='kye-hero-glow' />
             <div className='relative z-10 text-center max-w-lg mx-auto'>
-              <img src='/logo.png' alt='KyeAI' className='w-32 h-32 mx-auto mb-5 object-contain' />
+              <img src='/logo.png' alt='KyeAI' className='w-64 h-64 mx-auto mb-5 object-contain' />
               <h1 className='kye-hero-title text-[26px] md:text-[34px] mb-3'
                 style={{ textShadow: '0 0 40px rgba(139,92,246,0.12)' }}
               >
