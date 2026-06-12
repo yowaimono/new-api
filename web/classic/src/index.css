@@ -1370,6 +1370,11 @@ body[theme-mode="dark"] {
   box-shadow: 0 4px 24px rgba(0, 212, 255, 0.25) !important;
 }
 
+.kye-btn-sm {
+  height: 30px !important;
+  font-size: 13px !important;
+}
+
 .kye-btn-outline {
   background: var(--kye-surface) !important;
   border: 1px solid var(--kye-border) !important;

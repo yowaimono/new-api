@@ -776,28 +776,28 @@ const LoginForm = () => {
                 </div>
               )}
 
-              <div className='flex flex-col items-center space-y-3 pt-2'>
+              <div className='flex flex-col items-center pt-2'>
                 <Button
-                  className='kye-btn kye-btn-primary'
+                  className='kye-btn kye-btn-primary kye-btn-sm'
                   htmlType='submit'
                   onClick={handleSubmit}
                   loading={loginLoading}
-                  style={{ width: '70%' }}
+                  style={{ width: '55%' }}
                   disabled={
                     (hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms
                   }
                 >
                   {t('继续')}
                 </Button>
-
-                <Button
-                  className='kye-btn kye-btn-outline'
-                  onClick={handleResetPasswordClick}
-                  loading={resetPasswordLoading}
-                  style={{ width: '60%', height: 36 }}
-                >
-                  {t('忘记密码？')}
-                </Button>
+                <div className='w-full text-right mt-1.5'>
+                  <span
+                    className='kye-link'
+                    style={{ cursor: 'pointer', fontSize: 12 }}
+                    onClick={handleResetPasswordClick}
+                  >
+                    {t('忘记密码？')}
+                  </span>
+                </div>
               </div>
             </div>
 
