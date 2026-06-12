@@ -508,8 +508,8 @@ const LoginForm = () => {
     return (
       <div className='flex flex-col items-center'>
         <div className='w-full max-w-md'>
-          <div className='flex items-center justify-center mb-6 gap-2'>
-            <img src={logo} alt='Logo' className='h-10 rounded-full' />
+          <div className='text-center mb-6'>
+            <img src={logo} alt='Logo' className='w-24 h-24 mx-auto mb-4 object-contain' />
             <Title heading={3} className='kye-gradient-text'>
               {systemName}
             </Title>
@@ -704,8 +704,8 @@ const LoginForm = () => {
     return (
       <div className='flex flex-col items-center'>
         <div className='w-full max-w-md'>
-          <div className='flex items-center justify-center mb-6 gap-2'>
-            <img src={logo} alt='Logo' className='h-10 rounded-full' />
+          <div className='text-center mb-6'>
+            <img src={logo} alt='Logo' className='w-24 h-24 mx-auto mb-4 object-contain' />
             <Title heading={3} className='kye-gradient-text'>{systemName}</Title>
           </div>
 
@@ -924,7 +924,7 @@ const LoginForm = () => {
       >
         <Sun size={16} />
       </button>
-      <div className='w-full max-w-sm mt-[60px]'>
+      <div className='w-full max-w-md mt-[60px]'>
         {showEmailLogin ||
         !hasOAuthLoginOptions
           ? renderEmailLoginForm()
