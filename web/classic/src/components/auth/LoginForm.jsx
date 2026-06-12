@@ -726,8 +726,7 @@ const LoginForm = () => {
             <Form className='kye-input space-y-4'>
               <Form.Input
                 field='username'
-                label={t('用户名或邮箱')}
-                placeholder={t('请输入您的用户名或邮箱地址')}
+                placeholder={t('用户名或邮箱')}
                 name='username'
                 onChange={(value) => handleChange('username', value)}
                 prefix={<IconMail />}
@@ -735,8 +734,7 @@ const LoginForm = () => {
 
               <Form.Input
                 field='password'
-                label={t('密码')}
-                placeholder={t('请输入您的密码')}
+                placeholder={t('密码')}
                 name='password'
                 mode='password'
                 onChange={(value) => handleChange('password', value)}
