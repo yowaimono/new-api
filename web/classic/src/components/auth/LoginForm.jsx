@@ -787,7 +787,7 @@ const LoginForm = () => {
                     (hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms
                   }
                 >
-                  {t('继续')}
+                  {t('登录')}
                 </Button>
                 <div className='w-full text-right mt-1.5'>
                   <span
