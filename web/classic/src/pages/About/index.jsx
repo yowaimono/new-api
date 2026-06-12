@@ -35,13 +35,6 @@ const features = [
   },
 ];
 
-const stats = [
-  { label: '支持模型', value: '30+' },
-  { label: '开源协议', value: 'AGPL v3' },
-  { label: '技术栈', value: 'Go + React' },
-  { label: '始于', value: '2024' },
-];
-
 const About = () => {
   const { i18n } = useTranslation();
   const isChinese = i18n.language.startsWith('zh');
@@ -91,17 +84,6 @@ const About = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className='kye-card mb-10' style={{ padding: '20px 24px' }}>
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-center'>
-            {stats.map((s, i) => (
-              <div key={i}>
-                <div className='text-lg font-semibold' style={{ color: 'var(--kye-text)' }}>{s.value}</div>
-                <div className='text-xs mt-0.5' style={{ color: 'var(--kye-text-muted)' }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
       </div>
