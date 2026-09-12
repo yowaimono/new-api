@@ -10,9 +10,12 @@ deploy/
 │   ├── logo.png            部署用 logo（1:1 / 透明底 / 256x256）
 │   ├── process-logo.py     由原始素材重新生成 logo.png
 │   └── caddy-brand.conf    Caddy 静态路由片段，用于对外提供 logo
-└── compose/
-    ├── docker-compose.yml  生产部署编排（脱敏模板）
-    └── .env.example        环境变量模板，复制为 .env 后填值
+├── compose/
+│   ├── docker-compose.yml  生产部署编排（脱敏模板）
+│   └── .env.example        环境变量模板，复制为 .env 后填值
+└── pricing/
+    ├── model-pricing.json  模型定价（含时段分档计费表达式）
+    └── apply-pricing.sh    把定价写入到位（走官方 model_pricing 接口）
 ```
 
 ## 品牌配置
@@ -141,6 +144,77 @@ docker exec <redis容器> redis-cli -a "$PW" --no-auth-warning config set maxmem
 
 实际风险很低：当时 redis 仅用 1.72 MB（9 个键），距 48 MB 上限极远。
 待容器下次因正当原因重建时，模板中的参数会自动生效。
+
+## 模型定价
+
+定价文件 `pricing/model-pricing.json`，应用方式：
+
+```bash
+ADMIN_PASS='管理员密码' ./pricing/apply-pricing.sh
+```
+
+### 为什么必须显式配置
+
+new-api 对**未配置定价的模型**不会报错，而是静默套用硬编码兜底值
+（`setting/ratio_setting/model_ratio.go` 的 `GetModelRatio` 返回 `37.5`）。
+按 `QuotaPerUnit = 500000`（ratio 1 = $0.002/1K = $2/1M tokens）换算，
+**37.5 相当于 $75/1M tokens** —— 是真实成本的几十倍。
+
+前端只看「有没有可用渠道」，有渠道就展示，完全不校验价格是否合理。
+因此「有分组、有模型、看起来正常」并不代表价格配好了。
+
+### 为什么用 model_pricing 专用接口
+
+`PUT /api/option/` 写 `ModelRatio` 是**整表替换**，只写几个模型会把其余内置定价
+全部抹掉、一并退回 37.5 兜底。`PATCH /api/option/model_pricing` 是按模型合并，
+只影响指定模型（实测：写入 5 个模型后 `ModelRatio` 从 235 条增至 240 条，
+其余定价完好）。
+
+⚠️ 但**单个模型的 `pricing` 是整体替换语义** —— 改任何一个字段都必须把该模型的
+全部字段一起传，否则未传的字段会被清空。
+
+### 计价口径
+
+系数直接复制自上游 `tbtk.asia` 的 `/api/pricing`，采用其**时段分档表达式**
+（rc.36 的 `billing_mode = tiered_expr`）。表达式系数即**美元/1M tokens**，
+最终 `quota = 表达式输出 / 1e6 × QuotaPerUnit × 分组倍率`。
+
+| 模型 | 时段 | 输入 $/1M | 输出 $/1M | 缓存读 $/1M |
+| --- | --- | --- | --- | --- |
+| deepseek-v4-flash / -0731 / -vision-exp | 高峰 | 3.00 | 9.00 | 0.10 |
+| 同上 | 低谷 | 1.50 | 4.50 | 0.05 |
+| deepseek-v4-pro | 高峰 | 9.00 | 27.00 | 0.30 |
+| deepseek-v4-pro | 低谷 | 4.50 | 13.50 | 0.15 |
+| deepseek-v4.1-flash | 高峰 | 2.00 | 8.00 | 0.04 |
+| deepseek-v4.1-flash | 低谷 | 1.00 | 4.00 | 0.02 |
+
+高峰 = 周一至周五 09:00–12:00 与 14:00–18:00（Asia/Shanghai），其余为低谷
+（低谷约为全周的 79%）。
+
+### 利润来源
+
+上游这 5 个模型挂在 `低价国模分组`，其 `group_ratio = 0.5` —— **这就是我们的成本**。
+我方 `国模低价` 分组倍率为 **0.55**，两者之差 **0.05 即毛利**（约 10%）。
+
+若把 `国模低价` 调到 0.55 以下就会亏本；`default` 分组倍率为 1，毛利率约 100%。
+
+### 验证记录
+
+2026-09-12 端到端实测（真实请求 + 查日志核对）：
+
+```
+deepseek-v4-flash  输入 33 / 输出 8 / 无缓存命中 / 低谷时段
+表达式        33×1.5 + 8×4.5 = 85.5
+预期扣费      85.5 / 1e6 × 500000 × 0.55 = 23.51 quota
+实际扣费      24 quota（取整差）
+若按旧兜底价  846 quota（相差 36 倍）
+```
+
+### 已知的模型名变更
+
+上游 DeepSeek 官方已将 `deepseek-v4-flash` 与 `deepseek-v4-flash-vision-exp`
+**标记为退役**，请求实际由 V4.1-Flash 承接并以 Flash 价计费（实测调用返回的
+`model` 字段为 `deepseek-flash`）。当前渠道仍沿用旧名，价格按上游口径配置。
 
 ## 注意
 
