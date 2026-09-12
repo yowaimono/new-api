@@ -1,0 +1,39 @@
+{
+  "_comment": "妙云AI 模型定价。由 apply-pricing.sh 通过 PATCH /api/option/model_pricing 写入，勿手工编辑 billing_expr。",
+  "_source": "系数复制自上游 tbtk.asia 的公开 /api/pricing；上游分组倍率 0.5 即成本，我方分组倍率 0.55，差额 0.05 即毛利。",
+  "deepseek-v4-flash": {
+    "billing_setting.billing_mode": "tiered_expr",
+    "billing_setting.billing_expr": "(weekday(\"Asia/Shanghai\") >= 1 && weekday(\"Asia/Shanghai\") <= 5 && ((hour(\"Asia/Shanghai\") >= 9 && hour(\"Asia/Shanghai\") < 12) || (hour(\"Asia/Shanghai\") >= 14 && hour(\"Asia/Shanghai\") < 18)))\n  ? tier(\"高峰时段_周一至周五9-12和14-18时(2倍)\", p * 3 + c * 9 + cr * 0.1)\n  : tier(\"低谷时段\", p * 1.5 + c * 4.5 + cr * 0.05)",
+    "ModelRatio": 0.75,
+    "CompletionRatio": 3,
+    "CacheRatio": 0.033333333333
+  },
+  "deepseek-v4-flash-0731": {
+    "billing_setting.billing_mode": "tiered_expr",
+    "billing_setting.billing_expr": "(weekday(\"Asia/Shanghai\") >= 1 && weekday(\"Asia/Shanghai\") <= 5 && ((hour(\"Asia/Shanghai\") >= 9 && hour(\"Asia/Shanghai\") < 12) || (hour(\"Asia/Shanghai\") >= 14 && hour(\"Asia/Shanghai\") < 18)))\n  ? tier(\"高峰时段_周一至周五9-12和14-18时(2倍)\", p * 3 + c * 9 + cr * 0.1)\n  : tier(\"低谷时段\", p * 1.5 + c * 4.5 + cr * 0.05)",
+    "ModelRatio": 0.75,
+    "CompletionRatio": 3,
+    "CacheRatio": 0.033333333333
+  },
+  "deepseek-v4-flash-vision-exp": {
+    "billing_setting.billing_mode": "tiered_expr",
+    "billing_setting.billing_expr": "(weekday(\"Asia/Shanghai\") >= 1 && weekday(\"Asia/Shanghai\") <= 5 && ((hour(\"Asia/Shanghai\") >= 9 && hour(\"Asia/Shanghai\") < 12) || (hour(\"Asia/Shanghai\") >= 14 && hour(\"Asia/Shanghai\") < 18)))\n  ? tier(\"高峰时段_周一至周五9-12和14-18时(2倍)\", p * 3 + c * 9 + cr * 0.1)\n  : tier(\"低谷时段\", p * 1.5 + c * 4.5 + cr * 0.05)",
+    "ModelRatio": 0.75,
+    "CompletionRatio": 3,
+    "CacheRatio": 0.033333333333
+  },
+  "deepseek-v4-pro": {
+    "billing_setting.billing_mode": "tiered_expr",
+    "billing_setting.billing_expr": "(weekday(\"Asia/Shanghai\") >= 1 && weekday(\"Asia/Shanghai\") <= 5 && ((hour(\"Asia/Shanghai\") >= 9 && hour(\"Asia/Shanghai\") < 12) || (hour(\"Asia/Shanghai\") >= 14 && hour(\"Asia/Shanghai\") < 18)))\n  ? tier(\"高峰时段_周一至周五9-12和14-18时(2倍)\", p * 9 + c * 27 + cr * 0.3)\n  : tier(\"低谷时段\", p * 4.5 + c * 13.5 + cr * 0.15)",
+    "ModelRatio": 2.25,
+    "CompletionRatio": 3,
+    "CacheRatio": 0.033333333333
+  },
+  "deepseek-v4.1-flash": {
+    "billing_setting.billing_mode": "tiered_expr",
+    "billing_setting.billing_expr": "(weekday(\"Asia/Shanghai\") >= 1 && weekday(\"Asia/Shanghai\") <= 5 && ((hour(\"Asia/Shanghai\") >= 9 && hour(\"Asia/Shanghai\") < 12) || (hour(\"Asia/Shanghai\") >= 14 && hour(\"Asia/Shanghai\") < 18)))\n  ? tier(\"高峰时段_周一至周五9-12和14-18时(2倍)\", p * 2 + c * 8 + cr * 0.04)\n  : tier(\"低谷时段\", p * 1 + c * 4 + cr * 0.02)",
+    "ModelRatio": 0.5,
+    "CompletionRatio": 4,
+    "CacheRatio": 0.02
+  }
+}
