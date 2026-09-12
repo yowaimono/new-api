@@ -4,12 +4,15 @@
 
 ```
 deploy/
-└── brand/
-    ├── branding.json       品牌配置项（写入 New-API options 表）
-    ├── apply-branding.sh   把 branding.json 应用到位（走官方 API）
-    ├── logo.png            部署用 logo（1:1 / 透明底 / 256x256）
-    ├── process-logo.py     由原始素材重新生成 logo.png
-    └── caddy-brand.conf    Caddy 静态路由片段，用于对外提供 logo
+├── brand/
+│   ├── branding.json       品牌配置项（写入 New-API options 表）
+│   ├── apply-branding.sh   把 branding.json 应用到位（走官方 API）
+│   ├── logo.png            部署用 logo（1:1 / 透明底 / 256x256）
+│   ├── process-logo.py     由原始素材重新生成 logo.png
+│   └── caddy-brand.conf    Caddy 静态路由片段，用于对外提供 logo
+└── compose/
+    ├── docker-compose.yml  生产部署编排（脱敏模板）
+    └── .env.example        环境变量模板，复制为 .env 后填值
 ```
 
 ## 品牌配置
@@ -72,7 +75,48 @@ python3 process-logo.py <原始素材.png> logo.png
 脚本会依次完成：按合成模型反解 alpha（避免抗锯齿白边）、以墨迹包围盒中心裁出 1:1、缩放到 256x256。
 详见 `process-logo.py` 顶部注释。
 
+## 生产 compose
+
+`compose/docker-compose.yml` 是线上编排的**脱敏模板**，与运行态一致，但有三处刻意修正（文件末尾有详细说明）：
+
+1. 密钥改为 `.env` 注入，不再明文写死。
+2. **修正了 redis 的 `command`** —— 原文件的 command 是一段被拆散的字符串碎片
+   （`"[redis-server,"`、`"--requirepass,"`、`"${REDIS_PASSWORD}]"`），redis 会把
+   `[redis-server,` 当作配置文件路径，**重建容器时必然启动失败**。线上之所以还活着，
+   是因为运行中的容器创建于 2026-05-11，用的是正确的命令，之后没人重建过它。
+3. 去掉了 redis / postgres 的 `container_name` —— 线上这两个容器实际名为
+   `2fa9b3d24e4e_opc-new-api-redis` / `a98bd6a0b3e1_opc-new-api-postgres`，
+   说明 `container_name` 是后加的。compose 靠 `com.docker.compose.project/service`
+   标签识别容器，与名字无关；一旦补上 `container_name`，compose 会认为容器不存在而新建重复实例。
+
+### 应用方式
+
+```bash
+cp .env.example .env && vi .env      # 填入真实密钥
+
+# 全量（首次部署或需要重建依赖时）
+docker-compose -f docker-compose.yml up -d
+
+# 仅重建 new-api —— 最常用，不动 redis/postgres
+docker-compose -f docker-compose.yml up -d --no-deps new-api
+```
+
+> 本机只装了 `docker-compose` v1.29.2，**没有** `docker compose` v2 插件，命令必须用连字符形式。
+
+### 数据卷
+
+postgres 数据在命名卷 `new-api-custom_opc_new_api_pg_data`（compose 项目名前缀 +
+`opc_new_api_pg_data`）。重建 postgres 容器不会丢数据，但**不要同时运行两个挂载该卷的
+postgres 实例**，第二个会因数据目录被占用而起不来，并额外抢注 `postgres` 这个 DNS 别名。
+
+### 已知的运行态偏差
+
+线上 redis 实际只跑 `redis-server --requirepass <pw>`，模板中的
+`--maxmemory 48mb --maxmemory-policy allkeys-lru` **尚未生效**。当前若内存被撑满，
+容器会被 `mem_limit 48m` 直接 OOM 杀掉，而不是按 LRU 淘汰。要让模板意图生效需重建
+redis 容器，届时会短暂断开缓存连接（new-api 会自行重连）。
+
 ## 注意
 
-- 管理员密码不落盘、不进仓库，只通过 `ADMIN_PASS` 环境变量传入。
-- `docker-compose.yml`、`.env` 等含密钥的部署文件不纳入本目录。
+- 管理员密码、数据库密码、`SESSION_SECRET` 一律不落盘、不进仓库。
+- `compose/.env` 已被 `.gitignore` 第 16 行的 `.env` 规则覆盖。
