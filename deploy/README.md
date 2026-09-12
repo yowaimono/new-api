@@ -210,11 +210,48 @@ deepseek-v4-flash  输入 33 / 输出 8 / 无缓存命中 / 低谷时段
 若按旧兜底价  846 quota（相差 36 倍）
 ```
 
-### 已知的模型名变更
+### 已知的模型名变更（含一个必须避开的坑）
 
 上游 DeepSeek 官方已将 `deepseek-v4-flash` 与 `deepseek-v4-flash-vision-exp`
-**标记为退役**，请求实际由 V4.1-Flash 承接并以 Flash 价计费（实测调用返回的
-`model` 字段为 `deepseek-flash`）。当前渠道仍沿用旧名，价格按上游口径配置。
+**标记为退役**，请求实际由 V4.1-Flash 承接并以 Flash 价计费。
+
+> Use `deepseek-flash` as the model name. The legacy names `deepseek-v4-flash` and
+> `deepseek-v4-flash-vision-exp` are still accepted, but the corresponding models
+> have been retired, their requests are served by the DeepSeek-V4.1-Flash model
+> and billed at the Flash price.
+>
+> —— https://api-docs.deepseek.com/quick_start/pricing
+
+实测确认：
+
+```
+请求 deepseek-v4.1-flash  -> 返回 model=deepseek-flash
+请求 deepseek-v4-flash    -> 返回 model=deepseek-flash
+```
+
+**⚠️ 但不要把新名 `deepseek-flash` 加进渠道。** 上游 tbtk 的渠道只认它自己
+`/v1/models` 列出的 5 个名字，直接请求新名会被拒：
+
+```
+请求 deepseek-flash -> HTTP 503
+  No available channel for model deepseek-flash under group 低价国模分组
+```
+
+也就是说：**官方新名在模型侧成立，但在上游渠道侧不可用**。加了反而会让用户
+吃到 503。当前渠道沿用上游的 5 个旧名，价格按上游口径配置。
+
+### 上游的一个定价怪象
+
+`deepseek-v4-flash` 与 `deepseek-v4.1-flash` 请求后返回的是**同一个模型**
+（`deepseek-flash`），但上游对两者定价不同：
+
+| 模型名 | 上游 model_ratio | 折算输入 $/1M |
+| --- | --- | --- |
+| deepseek-v4-flash | 0.75 | $1.50（高峰 3.00） |
+| deepseek-v4.1-flash | 0.50 | $1.00（高峰 2.00） |
+
+同一模型、两个价，相差 1.5 倍。我方沿用上游口径（未自行合并），
+因此 `deepseek-v4.1-flash` 对用户更便宜。这属于上游的定价策略，不是配置错误。
 
 ## 注意
 
