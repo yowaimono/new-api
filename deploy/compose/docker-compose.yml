@@ -1,0 +1,128 @@
+# 妙云AI 生产部署 compose 模板
+#
+# 与线上运行态保持一致，但有两处刻意的修正，见文末「与原文件的差异」。
+# 所有密钥经同目录 .env 注入（见 .env.example），本文件不含任何明文凭据。
+
+version: '3.4'
+
+services:
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    mem_limit: 64m
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy:/etc/caddy:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - new-api
+    networks:
+      - opc-new-api-network
+
+  new-api:
+    image: new-api-custom:latest
+    container_name: opc-new-api
+    mem_limit: 128m
+    restart: always
+    command: --log-dir /app/logs
+    expose:
+      - "3000"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      - SQL_DSN=postgresql://${POSTGRES_USER:-root}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-new-api}
+      - REDIS_CONN_STRING=redis://:${REDIS_PASSWORD}@redis:6379
+      - TZ=${TZ:-Asia/Shanghai}
+      - ERROR_LOG_ENABLED=true
+      - BATCH_UPDATE_ENABLED=true
+      - NODE_NAME=${NODE_NAME:-opc-new-api-vps}
+      - SESSION_SECRET=${SESSION_SECRET}
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - opc-new-api-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 注意：redis / postgres 刻意不设 container_name。
+  # 线上这两个容器是早期由 compose 以 `<hash>_<service>` 形式创建的，compose 靠
+  # com.docker.compose.project/service 标签识别它们，与容器名无关。一旦补上
+  # container_name，compose 会认为容器不存在而新建重复实例：postgres 会因数据卷
+  # 被占用而起不来，同时多出一个同名 DNS 别名干扰 new-api 连接。
+  redis:
+    image: redis:latest
+    mem_limit: 48m
+    restart: always
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD}
+      - --maxmemory
+      - 48mb
+      - --maxmemory-policy
+      - allkeys-lru
+    networks:
+      - opc-new-api-network
+
+  postgres:
+    image: postgres:15
+    mem_limit: 128m
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-new-api}
+    volumes:
+      - opc_new_api_pg_data:/var/lib/postgresql/data
+    networks:
+      - opc-new-api-network
+
+volumes:
+  opc_new_api_pg_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  opc-new-api-network:
+    driver: bridge
+
+# ── 与原文件的差异 ────────────────────────────────────────────────
+#
+# 1. 密钥改为 .env 注入
+#    原文件把 SQL_DSN、REDIS_CONN_STRING、POSTGRES_PASSWORD 明文写死，
+#    无法入库。现改为 ${...} 占位，实际值放 .env（已 gitignore）。
+#
+# 2. 修正 redis 的 command
+#    原文件的 command 是一段被拆散的字符串碎片：
+#        - "redis-server"
+#        - "[redis-server,"
+#        - "--requirepass,"
+#        - "${REDIS_PASSWORD}]"
+#        - "--maxmemory"
+#        - "48mb"
+#        - "--maxmemory-policy"
+#        - "allkeys-lru"
+#    redis 会把 "[redis-server," 当作配置文件路径，重建容器时必然启动失败。
+#    且线上实际运行的命令只有 `redis-server --requirepass <pw>`，
+#    maxmemory / 淘汰策略均未生效——容器 mem_limit 48m 一旦被撑满会直接 OOM 被杀，
+#    而不是按 allkeys-lru 淘汰。此处按原意写成正确的列表形式。
+#
+# 3. 去掉 redis / postgres 的 container_name
+#    原因见上方注释。
+#
+# 应用方式：
+#   cp .env.example .env && vi .env      # 填入真实密钥
+#   docker-compose -f docker-compose.yml up -d
+#
+# 仅重建 new-api（不动 redis/postgres，最常用）：
+#   docker-compose -f docker-compose.yml up -d --no-deps new-api
