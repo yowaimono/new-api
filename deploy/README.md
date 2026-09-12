@@ -109,12 +109,38 @@ postgres 数据在命名卷 `new-api-custom_opc_new_api_pg_data`（compose 项�
 `opc_new_api_pg_data`）。重建 postgres 容器不会丢数据，但**不要同时运行两个挂载该卷的
 postgres 实例**，第二个会因数据目录被占用而起不来，并额外抢注 `postgres` 这个 DNS 别名。
 
-### 已知的运行态偏差
+### ⚠️ compose v1 无法重建容器（重要）
 
-线上 redis 实际只跑 `redis-server --requirepass <pw>`，模板中的
-`--maxmemory 48mb --maxmemory-policy allkeys-lru` **尚未生效**。当前若内存被撑满，
-容器会被 `mem_limit 48m` 直接 OOM 杀掉，而不是按 LRU 淘汰。要让模板意图生效需重建
-redis 容器，届时会短暂断开缓存连接（new-api 会自行重连）。
+线上 Docker Engine 是 **28.2.2**，其 image inspect 已不再返回 `ContainerConfig` 字段；
+而 `docker-compose` v1.29.2 仍在读这个字段，**任何容器重建都会失败**：
+
+```
+KeyError: 'ContainerConfig'   # compose/service.py: get_container_data_volumes
+```
+
+危险之处在于 compose 的执行顺序是**先停掉旧容器、再创建新容器**。失败后旧容器已被停掉，
+新容器又没建起来 —— 等于直接把服务打挂。2026-09-12 就因此中断过一次 redis，
+站点返回 500，靠 `docker start <旧容器>` 才恢复。
+
+**因此：在这台机器上不要用 compose 重建任何容器**，包括 `up -d`、`--force-recreate`、
+`restart` 之外的操作。重建只能改用 `docker run`（保留原 network / mem_limit / restart /
+compose 标签），或者先装 compose v2。
+
+### redis maxmemory 的现状
+
+模板中 redis 命令带 `--maxmemory 40mb --maxmemory-policy allkeys-lru`，
+取 40mb 而不是等于 `mem_limit` 的 48m，是为了给客户端缓冲等非数据集内存留余量。
+
+线上容器创建于 2026-05-11，命令里**没有**这两项，且因上述 compose 缺陷无法重建。
+2026-09-12 已用运行时配置补上（重启容器即失效）：
+
+```bash
+docker exec <redis容器> redis-cli -a "$PW" --no-auth-warning config set maxmemory 40mb
+docker exec <redis容器> redis-cli -a "$PW" --no-auth-warning config set maxmemory-policy allkeys-lru
+```
+
+实际风险很低：当时 redis 仅用 1.72 MB（9 个键），距 48 MB 上限极远。
+待容器下次因正当原因重建时，模板中的参数会自动生效。
 
 ## 注意
 

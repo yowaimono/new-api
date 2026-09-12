@@ -67,8 +67,10 @@ services:
       - redis-server
       - --requirepass
       - ${REDIS_PASSWORD}
+      # 取 40mb 而不是等于 mem_limit 的 48m：必须给客户端缓冲等非数据集内存留出余量，
+      # 否则内存增长时仍会先撞上容器上限被 OOM 杀掉，达不到 LRU 淘汰的效果。
       - --maxmemory
-      - 48mb
+      - 40mb
       - --maxmemory-policy
       - allkeys-lru
     networks:
