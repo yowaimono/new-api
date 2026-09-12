@@ -1,0 +1,5 @@
+{
+  "_comment": "妙云AI 品牌配置。由 apply-branding.sh 通过 New-API 官方 option 接口写入 options 表。新增品牌项只需在此追加键值对。",
+  "SystemName": "妙云AI",
+  "Logo": "https://ai.kyeai.xyz/brand/logo-1x1.png"
+}
