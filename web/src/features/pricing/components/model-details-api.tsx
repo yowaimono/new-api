@@ -423,6 +423,98 @@ function buildImageSample(lang: Lang, ctx: SampleContext): string {
   ].join('\n')
 }
 
+function buildVideoSample(lang: Lang, ctx: SampleContext): string {
+  const url = `${ctx.baseUrl}${ctx.endpointPath}`
+  const prompt = 'A cat walking through tall grass at golden hour.'
+  const pollUrl = `${ctx.baseUrl}/v1/videos/<VIDEO_ID>`
+  const contentUrl = `${ctx.baseUrl}/v1/videos/<VIDEO_ID>/content`
+
+  if (lang === 'curl') {
+    const body = JSON.stringify({ model: ctx.modelName, prompt }, null, 2)
+    return [
+      `# 1. Create the video task`,
+      `curl ${url} \\`,
+      `  -H "Authorization: Bearer ${ctx.apiKeyEnv}" \\`,
+      `  -H "Content-Type: application/json" \\`,
+      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      ``,
+      `# 2. Poll the task until "status" is "completed"`,
+      `curl ${pollUrl} \\`,
+      `  -H "Authorization: Bearer ${ctx.apiKeyEnv}"`,
+      ``,
+      `# 3. Download the finished video`,
+      `curl ${contentUrl} \\`,
+      `  -H "Authorization: Bearer ${ctx.apiKeyEnv}" \\`,
+      `  -o output.mp4`,
+    ].join('\n')
+  }
+  if (lang === 'python') {
+    return [
+      'import time',
+      '',
+      'import requests',
+      '',
+      `base_url = "${ctx.baseUrl}/v1"`,
+      'headers = {"Authorization": "Bearer <YOUR_API_KEY>"}',
+      '',
+      'created = requests.post(',
+      '    f"{base_url}/videos",',
+      '    headers=headers,',
+      `    json={"model": "${ctx.modelName}", "prompt": "${prompt}"},`,
+      ').json()',
+      '',
+      'video_id = created["id"]',
+      'while True:',
+      '    task = requests.get(f"{base_url}/videos/{video_id}", headers=headers).json()',
+      '    if task.get("status") in ("completed", "failed"):',
+      '        break',
+      '    time.sleep(5)',
+      '',
+      'video = requests.get(f"{base_url}/videos/{video_id}/content", headers=headers)',
+      'open("output.mp4", "wb").write(video.content)',
+    ].join('\n')
+  }
+  if (lang === 'typescript') {
+    return [
+      `import { writeFile } from 'node:fs/promises'`,
+      ``,
+      `const baseUrl = '${ctx.baseUrl}/v1'`,
+      `const headers = { Authorization: \`Bearer \${process.env.${ctx.apiKeyEnv}}\` }`,
+      ``,
+      `const created = await fetch(\`\${baseUrl}/videos\`, {`,
+      `  method: 'POST',`,
+      `  headers: { ...headers, 'Content-Type': 'application/json' },`,
+      `  body: JSON.stringify({ model: '${ctx.modelName}', prompt: '${prompt}' }),`,
+      `}).then((response) => response.json())`,
+      ``,
+      `let task = created`,
+      `while (task.status !== 'completed' && task.status !== 'failed') {`,
+      `  await new Promise((resolve) => setTimeout(resolve, 5000))`,
+      `  task = await fetch(\`\${baseUrl}/videos/\${created.id}\`, { headers }).then(`,
+      `    (response) => response.json()`,
+      `  )`,
+      `}`,
+      `if (task.status !== 'completed') throw new Error('video generation failed')`,
+      ``,
+      `const video = await fetch(\`\${baseUrl}/videos/\${created.id}/content\`, { headers })`,
+      `await writeFile('output.mp4', Buffer.from(await video.arrayBuffer()))`,
+    ].join('\n')
+  }
+  return [
+    `const baseUrl = '${ctx.baseUrl}/v1'`,
+    `const headers = { Authorization: \`Bearer \${process.env.${ctx.apiKeyEnv}}\` }`,
+    ``,
+    `const created = await fetch(\`\${baseUrl}/videos\`, {`,
+    `  method: 'POST',`,
+    `  headers: { ...headers, 'Content-Type': 'application/json' },`,
+    `  body: JSON.stringify({ model: '${ctx.modelName}', prompt: '${prompt}' }),`,
+    `}).then((response) => response.json())`,
+    ``,
+    `// Poll GET ${pollUrl} until status is "completed",`,
+    `// then download GET ${contentUrl}`,
+  ].join('\n')
+}
+
 function buildSample(
   lang: Lang,
   endpointType: string,
@@ -433,6 +525,7 @@ function buildSample(
   if (endpointType === 'embeddings' || endpointType === 'jina-rerank')
     return buildEmbeddingSample(lang, ctx)
   if (endpointType === 'image-generation') return buildImageSample(lang, ctx)
+  if (endpointType === 'openai-video') return buildVideoSample(lang, ctx)
   return buildChatSample(lang, ctx)
 }
 
