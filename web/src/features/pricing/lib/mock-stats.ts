@@ -742,24 +742,17 @@ const VIDEO_PARAMS: SupportedParameter[] = [
     descriptionKey: 'Text description of the desired video',
   },
   {
-    name: 'duration',
+    name: 'seconds',
     type: 'integer',
     range: '1 ~ 60',
+    defaultValue: 5,
     descriptionKey: 'Video length in seconds',
   },
   {
-    name: 'aspect_ratio',
-    type: 'enum',
-    enumValues: ['16:9', '9:16', '1:1'],
-    defaultValue: '16:9',
-    descriptionKey: 'Output aspect ratio',
-  },
-  {
-    name: 'fps',
-    type: 'integer',
-    range: '8 ~ 60',
-    defaultValue: 24,
-    descriptionKey: 'Frames per second',
+    name: 'size',
+    type: 'string',
+    defaultValue: '1280x720',
+    descriptionKey: 'Output video size, e.g. 1280x720 or 1024x1024',
   },
 ]
 
@@ -772,6 +765,16 @@ type ApiCategory = 'reasoning' | 'embedding' | 'image' | 'video' | 'chat'
  * need to distinguish them so the request-parameter table is accurate.
  */
 function apiCategoryOf(model: PricingModel): ApiCategory {
+  // Declared endpoint types are authoritative: they describe the request
+  // shape the model is actually served through. A model name alone cannot
+  // tell a task model from a chat model (e.g. "MiniMax-H3 768P" matches
+  // the /mini/ fast-profile pattern and used to fall through to chat).
+  const endpoints = model.supported_endpoint_types ?? []
+  if (endpoints.includes('openai-video')) return 'video'
+  if (endpoints.includes('image-generation')) return 'image'
+  if (endpoints.includes('embeddings') || endpoints.includes('jina-rerank'))
+    return 'embedding'
+
   const profile = PROFILE_BY_NAME(model.model_name)
   if (profile === 'embedding' || profile === 'reasoning') return profile
   if (profile === 'image') {
