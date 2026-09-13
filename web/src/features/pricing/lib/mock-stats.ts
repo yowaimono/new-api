@@ -505,6 +505,7 @@ export type SupportedParameter = {
     | 'object'
     | 'array'
     | 'enum'
+    | 'file'
   defaultValue?: string | number | boolean
   range?: string
   enumValues?: string[]
