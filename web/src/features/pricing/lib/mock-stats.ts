@@ -751,8 +751,23 @@ const VIDEO_PARAMS: SupportedParameter[] = [
   {
     name: 'size',
     type: 'string',
-    defaultValue: '1280x720',
-    descriptionKey: 'Output video size, e.g. 1280x720 or 1024x1024',
+    defaultValue: '768x768',
+    descriptionKey: 'Output video size, e.g. 768x768',
+  },
+  {
+    name: 'input_reference',
+    type: 'file',
+    descriptionKey: 'Reference image upload (multipart); repeat with the _2 .. _9 suffix for more images',
+  },
+  {
+    name: 'input_video',
+    type: 'file',
+    descriptionKey: 'Reference video upload (multipart)',
+  },
+  {
+    name: 'input_audio',
+    type: 'file',
+    descriptionKey: 'Reference audio upload (multipart)',
   },
 ]
 
