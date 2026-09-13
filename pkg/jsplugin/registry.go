@@ -299,6 +299,19 @@ func CompilePlugin(source string, options Options) (*LoadedPlugin, error) {
 	if artifactHooks["listArtifacts"] != artifactHooks["buildContentRequest"] {
 		return nil, fmt.Errorf("plugin %s must export listArtifacts and buildContentRequest together", meta.Key)
 	}
+	// A pre-submit phase needs both halves: one describes the upstream requests,
+	// the other turns their responses into the value the submit hook consumes.
+	prepareHooks := make(map[string]bool, 2)
+	for _, hook := range []string{"buildPrepareRequest", "parsePrepareResponse"} {
+		callable, callableErr := engine.HasCallablePath(context.Background(), hook)
+		if callableErr != nil {
+			return nil, callableErr
+		}
+		prepareHooks[hook] = callable
+	}
+	if prepareHooks["buildPrepareRequest"] != prepareHooks["parsePrepareResponse"] {
+		return nil, fmt.Errorf("plugin %s must export buildPrepareRequest and parsePrepareResponse together", meta.Key)
+	}
 	for _, route := range meta.Routes {
 		for kind, member := range map[string]string{"decode": route.Decode, "render": route.Render} {
 			if member == "" {

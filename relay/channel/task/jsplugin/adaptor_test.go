@@ -1435,3 +1435,91 @@ export function parseBatchResult(){return [];}
 	assert.Equal(t, []any{"model-a", "model-b"}, captured["models"])
 	assert.Equal(t, false, captured["hasRequestBody"])
 }
+
+func TestTaskAdaptorRunsPreparePhaseBeforeSubmit(t *testing.T) {
+	var uploadedFile string
+	var uploadedMaterialID string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Avoid t.FailNow off the test goroutine: record and assert afterwards.
+		if parseErr := r.ParseMultipartForm(1 << 20); parseErr == nil && r.MultipartForm != nil {
+			uploadedMaterialID = r.FormValue("material_id")
+			if files := r.MultipartForm.File["file"]; len(files) == 1 {
+				if opened, openErr := files[0].Open(); openErr == nil {
+					if content, readErr := io.ReadAll(opened); readErr == nil {
+						uploadedFile = string(content)
+					}
+					opened.Close()
+				}
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"material":{"material_id":"pg-1","sha256":"sha-1","object_revision":3}}`))
+	}))
+	defer server.Close()
+
+	source := `
+export const meta = {apiVersion:1,key:"prepare",name:"Prepare",version:"1.0.0",author:{name:"Test"},models:["m"],fetchMode:"per_task"};
+export function buildPrepareRequest(ctx) {
+  return {url: ctx.baseUrl + "/materials", method: "POST", bodyType: "multipart",
+    parts: [{name: "material_id", value: "pg-1"}, {name: "file", fileRef: ctx.files[0].ref, filename: "reference_1.png"}]};
+}
+export function parsePrepareResponse(ctx, responses) {
+  return {material: responses[0].body.material};
+}
+export function buildSubmitRequest(ctx) {
+  const material = (ctx.prepared && ctx.prepared.material) || null;
+  return {url: ctx.baseUrl + "/submit", body: {model: "m", materials: material ? [material] : []}};
+}
+export function parseSubmitResponse(){return {taskId:"1"}} export function buildQueryRequest(){return {url:"https://example.com"}} export function parseTaskResult(){return {status:"SUCCESS"}}
+`
+	plugin, err := pluginruntime.NewRegistry().Register(source, pluginruntime.Options{})
+	require.NoError(t, err)
+	adaptor := New(plugin)
+	info := &relaycommon.RelayInfo{ChannelMeta: &relaycommon.ChannelMeta{ChannelBaseUrl: server.URL}, TaskRelayInfo: &relaycommon.TaskRelayInfo{}}
+	adaptor.Init(info)
+
+	var input bytes.Buffer
+	writer := multipart.NewWriter(&input)
+	file, err := writer.CreateFormFile("input_reference", "reference_1.png")
+	require.NoError(t, err)
+	_, err = file.Write([]byte("image-bytes"))
+	require.NoError(t, err)
+	require.NoError(t, writer.Close())
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/videos", bytes.NewReader(input.Bytes()))
+	c.Request.Header.Set("Content-Type", writer.FormDataContentType())
+	c.Set("task_request", relaycommon.TaskSubmitReq{Prompt: "p"})
+
+	body, err := adaptor.BuildRequestBody(c, info)
+	require.NoError(t, err)
+	submitBody, err := io.ReadAll(body)
+	require.NoError(t, err)
+
+	assert.Equal(t, "image-bytes", uploadedFile)
+	assert.Equal(t, "pg-1", uploadedMaterialID)
+	assert.JSONEq(t, `{"model":"m","materials":[{"material_id":"pg-1","sha256":"sha-1","object_revision":3}]}`, string(submitBody))
+}
+
+func TestDecodePrepareDescriptorsAcceptsSingleListAndEmpty(t *testing.T) {
+	single, err := decodePrepareDescriptors(map[string]any{"url": "https://example.com/a"})
+	require.NoError(t, err)
+	require.Len(t, single, 1)
+
+	list, err := decodePrepareDescriptors([]any{
+		map[string]any{"url": "https://example.com/a"},
+		map[string]any{"url": "https://example.com/b"},
+	})
+	require.NoError(t, err)
+	require.Len(t, list, 2)
+
+	empty, err := decodePrepareDescriptors(nil)
+	require.NoError(t, err)
+	assert.Empty(t, empty)
+
+	blank, err := decodePrepareDescriptors(map[string]any{"url": "  "})
+	require.NoError(t, err)
+	assert.Empty(t, blank)
+
+	_, err = decodePrepareDescriptors([]any{map[string]any{"url": ""}})
+	require.Error(t, err)
+}
