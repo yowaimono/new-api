@@ -45,7 +45,14 @@ describe('buildSupportedParameters', () => {
       supported_endpoint_types: ['openai-video'],
     })
 
-    expect(parameterNames(model)).toEqual(['prompt', 'seconds', 'size'])
+    expect(parameterNames(model)).toEqual([
+      'prompt',
+      'seconds',
+      'size',
+      'input_reference',
+      'input_video',
+      'input_audio',
+    ])
   })
 
   it('keeps chat parameters for chat endpoints', () => {
