@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"maps"
+	"slices"
 	"strings"
 
 	"sync"
@@ -112,6 +113,13 @@ func GetModelSupportEndpointTypes(model string) []constant.EndpointType {
 }
 
 func getPricingEndpointTypesForAbility(ability AbilityWithChannel, advancedCustomConfigs map[int]*dto.AdvancedCustomConfig) []constant.EndpointType {
+	if ability.ChannelType == constant.ChannelTypeTaskPlugin {
+		if endpoints := taskPluginEndpointTypes(ability.ChannelId, ability.Model); len(endpoints) > 0 {
+			return endpoints
+		}
+		// 未绑定插件或插件未声明协议时退回默认推断，避免把模型从目录里抹掉。
+		return common.GetEndpointTypesByChannelType(ability.ChannelType, ability.Model)
+	}
 	if ability.ChannelType != constant.ChannelTypeAdvancedCustom {
 		return common.GetEndpointTypesByChannelType(ability.ChannelType, ability.Model)
 	}
@@ -119,6 +127,62 @@ func getPricingEndpointTypesForAbility(ability AbilityWithChannel, advancedCusto
 		return config.SupportedEndpointTypesForModel(ability.Model)
 	}
 	return common.GetEndpointTypesByChannelType(ability.ChannelType, ability.Model)
+}
+
+// taskPluginForChannel 取 type-61 渠道绑定的任务插件（渠道设置里的 task_plugin_key）。
+func taskPluginForChannel(channelID int) (*jsplugin.LoadedPlugin, bool) {
+	channel, err := CacheGetChannel(channelID)
+	if err != nil {
+		common.SysLog(fmt.Sprintf("load task plugin channel settings error: channel_id=%d, error=%v", channelID, err))
+		return nil, false
+	}
+	key := strings.TrimSpace(channel.GetSetting().TaskPluginKey)
+	if key == "" {
+		return nil, false
+	}
+	plugin, ok := jsplugin.DefaultRegistry.Get(key)
+	if !ok || plugin == nil {
+		return nil, false
+	}
+	return plugin, true
+}
+
+// taskPluginEndpointTypes 把 type-61 任务插件渠道声明的 host 协议映射成目录端点类型。
+// 目录此前对这类渠道一律回落到 openai，导致视频等任务模型被标成 chat 端点。
+func taskPluginEndpointTypes(channelID int, model string) []constant.EndpointType {
+	plugin, ok := taskPluginForChannel(channelID)
+	if !ok || plugin == nil {
+		return nil
+	}
+	endpoints := make([]constant.EndpointType, 0, len(plugin.Meta.Protocols))
+	seen := make(map[constant.EndpointType]struct{}, len(plugin.Meta.Protocols))
+	for _, claim := range plugin.Meta.Protocols {
+		if len(claim.Models) > 0 && !slices.Contains(claim.Models, model) {
+			continue
+		}
+		endpoint, ok := endpointTypeForHostProtocol(claim.Name)
+		if !ok {
+			continue
+		}
+		if _, exists := seen[endpoint]; exists {
+			continue
+		}
+		seen[endpoint] = struct{}{}
+		endpoints = append(endpoints, endpoint)
+	}
+	return endpoints
+}
+
+// endpointTypeForHostProtocol 只映射目录能表达的端点；其余协议返回 false，由调用方回落。
+func endpointTypeForHostProtocol(protocol string) (constant.EndpointType, bool) {
+	switch protocol {
+	case "openai_video":
+		return constant.EndpointTypeOpenAIVideo, true
+	case "openai_responses":
+		return constant.EndpointTypeOpenAIResponse, true
+	default:
+		return "", false
+	}
 }
 
 // loadPricingAdvancedCustomConfigs runs inside updatePricing while
