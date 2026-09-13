@@ -301,6 +301,29 @@ func getModelFromRequest(c *gin.Context) (*ModelRequest, error) {
 		}
 		return modelRequest, nil
 	}
+	// Multipart task submissions carry the model as a form field. Read it through
+	// the reusable form cache so the parsed form (and its uploads) stay available
+	// to the plugin hooks that run later. Without this the protocol binding cannot
+	// be pinned and the request falls through to another plugin.
+	if strings.HasPrefix(c.Request.Header.Get("Content-Type"), "multipart/form-data") {
+		form, formErr := common.ParseMultipartFormReusable(c)
+		if formErr != nil {
+			return nil, errors.New(i18n.T(c, i18n.MsgDistributorInvalidRequest, map[string]any{"Error": formErr.Error()}))
+		}
+		if form != nil {
+			models := form.Value["model"]
+			if len(models) > 1 {
+				return nil, errors.New(i18n.T(c, i18n.MsgDistributorInvalidRequest, map[string]any{"Error": "model must be provided once"}))
+			}
+			if len(models) == 1 {
+				group := ""
+				if groups := form.Value["group"]; len(groups) == 1 {
+					group = strings.TrimSpace(groups[0])
+				}
+				return &ModelRequest{Model: strings.TrimSpace(models[0]), Group: group}, nil
+			}
+		}
+	}
 
 	var modelRequest ModelRequest
 	err := common.UnmarshalBodyReusable(c, &modelRequest)
