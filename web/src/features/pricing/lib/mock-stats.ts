@@ -755,6 +755,21 @@ const VIDEO_PARAMS: SupportedParameter[] = [
     defaultValue: '768x768',
     descriptionKey: 'Output video size, e.g. 768x768',
   },
+  {
+    name: 'input_reference',
+    type: 'file',
+    descriptionKey: 'Reference image upload (multipart); repeat with the _2 .. _9 suffix for more images',
+  },
+  {
+    name: 'input_video',
+    type: 'file',
+    descriptionKey: 'Reference video upload (multipart)',
+  },
+  {
+    name: 'input_audio',
+    type: 'file',
+    descriptionKey: 'Reference audio upload (multipart)',
+  },
 ]
 
 type ApiCategory = 'reasoning' | 'embedding' | 'image' | 'video' | 'chat'
