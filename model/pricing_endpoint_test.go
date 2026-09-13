@@ -6,6 +6,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/pkg/jsplugin"
 	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -291,4 +292,78 @@ func TestCacheUpdateChannelSyncsAdvancedCustomConfig(t *testing.T) {
 	CacheUpdateChannel(channel)
 
 	assert.Nil(t, channel2advancedCustomConfig[401])
+}
+
+// A type-61 task-plugin channel previously fell back to the OpenAI chat
+// endpoint in /api/pricing, so task models (e.g. video) were advertised as
+// chat models. These tests cover mapping the bound plugin's claimed host
+// protocols to catalog endpoint types.
+func insertPricingEndpointTaskPluginChannel(t *testing.T, channelID int, pluginKey string) {
+	t.Helper()
+	channel := &Channel{
+		Id:     channelID,
+		Type:   constant.ChannelTypeTaskPlugin,
+		Key:    fmt.Sprintf("key-%d", channelID),
+		Status: common.ChannelStatusEnabled,
+		Name:   fmt.Sprintf("channel-%d", channelID),
+	}
+	channel.SetSetting(dto.ChannelSettings{TaskPluginKey: pluginKey})
+	require.NoError(t, DB.Create(channel).Error)
+}
+
+func pricingEndpointTaskPluginSource(key string, modelsJSON string, protocolsJSON string) string {
+	return fmt.Sprintf(`
+export const meta = {
+  apiVersion: 1,
+  key: %q,
+  name: "Pricing Endpoint Probe",
+  version: "1.0.0",
+  author: {name: "Test"},
+  models: %s,
+  fetchMode: "per_task",
+  protocols: [%s],
+};
+export function buildSubmitRequest() { return {url: "https://example.com"}; }
+export function parseSubmitResponse() { return {taskId: "one"}; }
+export function buildQueryRequest() { return {url: "https://example.com"}; }
+export function parseTaskResult() { return {status: "SUCCESS"}; }
+export function listArtifacts() { return []; }
+export function buildContentRequest() { throw new Error("artifact_not_found"); }
+export const protocols = {
+  openai_video: {
+    decodeRequest: function(ctx) {
+      return {kind: "submit", model: "h3-test", requestBody: {model: "h3-test"}};
+    },
+    render: function() { return {}; },
+  },
+};
+`, key, modelsJSON, protocolsJSON)
+}
+
+func TestPricingTaskPluginUsesClaimedProtocolEndpointTypes(t *testing.T) {
+	resetPricingEndpointTestTables(t)
+	const pluginKey = "pricing-endpoint-video"
+	source := pricingEndpointTaskPluginSource(pluginKey, `["h3-test"]`, `"openai_video"`)
+	_, err := jsplugin.DefaultRegistry.Register(source, jsplugin.Options{})
+	require.NoError(t, err)
+	t.Cleanup(func() { jsplugin.DefaultRegistry.Unregister(pluginKey) })
+
+	insertPricingEndpointTaskPluginChannel(t, 501, pluginKey)
+	insertPricingEndpointAbility(t, 501, "h3-test")
+
+	byModel := pricingEndpointTypesByModel(t)
+	require.Contains(t, byModel, "h3-test")
+	assert.Equal(t, []constant.EndpointType{constant.EndpointTypeOpenAIVideo}, byModel["h3-test"])
+}
+
+func TestPricingTaskPluginWithoutBindingFallsBackToChannelType(t *testing.T) {
+	resetPricingEndpointTestTables(t)
+	// A type-61 channel with no resolvable plugin keeps the previous default
+	// inference instead of dropping the model from the catalog.
+	insertPricingEndpointTaskPluginChannel(t, 502, "pricing-endpoint-missing")
+	insertPricingEndpointAbility(t, 502, "h3-test")
+
+	byModel := pricingEndpointTypesByModel(t)
+	require.Contains(t, byModel, "h3-test")
+	assert.Equal(t, []constant.EndpointType{constant.EndpointTypeOpenAI}, byModel["h3-test"])
 }
