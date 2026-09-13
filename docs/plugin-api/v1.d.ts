@@ -49,3 +49,26 @@ export declare function extractUsageOnSubmit(ctx: DriverContext, taskData: unkno
 export declare function extractUsageOnComplete(task: TaskView, result: NormalizedTaskResult, data: unknown): Readonly<Record<string, string | number | boolean>> | null;
 export declare function listArtifacts(task: {taskId: string; status: string; action: string; data: unknown; producerVersion: string}): readonly TaskArtifact[];
 export declare function buildContentRequest(ctx: DriverContext & {artifactKey: string; data: unknown; state?: unknown; upstreamTaskId: string; clientRequest: {method: "GET" | "HEAD"; headers: Readonly<Record<string, string>>}}): RequestDescriptor;
+
+/**
+ * Optional pre-submit phase. A plugin that must register a vendor-side asset
+ * before it can submit a task exports buildPrepareRequest: the host sends every
+ * returned descriptor in order, then calls parsePrepareResponse with the decoded
+ * responses. The returned value is exposed to buildSubmitRequest as
+ * ctx.prepared. Both hooks must be exported together.
+ */
+export declare const buildPrepareRequest:
+  | ((
+      ctx: Record<string, unknown>
+    ) => RequestDescriptor | readonly RequestDescriptor[] | null | undefined)
+  | undefined;
+export declare const parsePrepareResponse:
+  | ((
+      ctx: Record<string, unknown>,
+      responses: readonly Readonly<{
+        statusCode: number;
+        headers: Readonly<Record<string, readonly string[]>>;
+        body: unknown;
+      }>[]
+    ) => unknown)
+  | undefined;

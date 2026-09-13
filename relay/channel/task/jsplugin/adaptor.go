@@ -82,6 +82,8 @@ type TaskAdaptor struct {
 	plugin         *pluginruntime.LoadedPlugin
 	info           *relaycommon.RelayInfo
 	submit         *requestDescriptor
+	prepared       any
+	preparedOnce   bool
 	routeRequest   *pluginruntime.RouteRequestContext
 	requestHeaders map[string]string
 	files          []map[string]any
@@ -221,14 +223,32 @@ func (a *TaskAdaptor) BuildRequestHeader(_ *gin.Context, req *http.Request, _ *r
 }
 
 func (a *TaskAdaptor) BuildRequestBody(c *gin.Context, info *relaycommon.RelayInfo) (io.Reader, error) {
+	if err := a.prepareSubmit(c, info); err != nil {
+		return nil, err
+	}
 	descriptor, err := a.buildSubmit(c, info)
 	if err != nil {
 		return nil, err
 	}
+	body, contentType, err := a.encodeDescriptor(c, descriptor)
+	if err != nil {
+		return nil, err
+	}
+	if contentType != "" {
+		c.Request.Header.Set("Content-Type", contentType)
+	}
+	return body, nil
+}
+
+// encodeDescriptor renders a request descriptor into a wire body. Multipart
+// descriptors stream the referenced uploads; JSON descriptors inline any file
+// placeholders as Base64 or data URLs. The returned content type is empty when
+// the descriptor carries no body.
+func (a *TaskAdaptor) encodeDescriptor(c *gin.Context, descriptor *requestDescriptor) (io.Reader, string, error) {
 	if descriptor.BodyType == "multipart" {
 		form, parseErr := common.ParseMultipartFormReusable(c)
 		if parseErr != nil {
-			return nil, parseErr
+			return nil, "", parseErr
 		}
 		defer form.RemoveAll()
 		var body bytes.Buffer
@@ -238,26 +258,26 @@ func (a *TaskAdaptor) BuildRequestBody(c *gin.Context, info *relaycommon.RelayIn
 				header := make(textproto.MIMEHeader)
 				disposition := mime.FormatMediaType("form-data", map[string]string{"name": part.Name})
 				if disposition == "" {
-					return nil, fmt.Errorf("invalid multipart name")
+					return nil, "", fmt.Errorf("invalid multipart name")
 				}
 				header.Set("Content-Disposition", disposition)
 				destination, createErr := writer.CreatePart(header)
 				if createErr != nil {
-					return nil, createErr
+					return nil, "", createErr
 				}
-				if _, err = io.WriteString(destination, fmt.Sprint(part.Value)); err != nil {
-					return nil, err
+				if _, err := io.WriteString(destination, fmt.Sprint(part.Value)); err != nil {
+					return nil, "", err
 				}
 				continue
 			}
 			field := strings.TrimPrefix(part.FileRef, "request_file:")
 			files := form.File[field]
 			if len(files) == 0 {
-				return nil, fmt.Errorf("unknown file reference %q", part.FileRef)
+				return nil, "", fmt.Errorf("unknown file reference %q", part.FileRef)
 			}
 			file, openErr := files[0].Open()
 			if openErr != nil {
-				return nil, openErr
+				return nil, "", openErr
 			}
 			filename := part.Filename
 			if filename == "" {
@@ -267,7 +287,7 @@ func (a *TaskAdaptor) BuildRequestBody(c *gin.Context, info *relaycommon.RelayIn
 			disposition := mime.FormatMediaType("form-data", map[string]string{"name": part.Name, "filename": filename})
 			if disposition == "" {
 				file.Close()
-				return nil, fmt.Errorf("invalid multipart name or filename")
+				return nil, "", fmt.Errorf("invalid multipart name or filename")
 			}
 			header.Set("Content-Disposition", disposition)
 			header.Set("Content-Type", files[0].Header.Get("Content-Type"))
@@ -277,32 +297,30 @@ func (a *TaskAdaptor) BuildRequestBody(c *gin.Context, info *relaycommon.RelayIn
 			}
 			file.Close()
 			if copyErr != nil {
-				return nil, copyErr
+				return nil, "", copyErr
 			}
 		}
-		if err = writer.Close(); err != nil {
-			return nil, err
+		if err := writer.Close(); err != nil {
+			return nil, "", err
 		}
-		c.Request.Header.Set("Content-Type", writer.FormDataContentType())
-		return bytes.NewReader(body.Bytes()), nil
+		return bytes.NewReader(body.Bytes()), writer.FormDataContentType(), nil
 	}
 	if descriptor.Body == nil {
-		return nil, nil
+		return nil, "", nil
 	}
 	if text, ok := descriptor.Body.(string); ok {
-		return strings.NewReader(text), nil
+		return strings.NewReader(text), "application/json", nil
 	}
 	inlined, err := inlineJSONFilePlaceholders(c, descriptor.Body)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	body, err := common.Marshal(inlined)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	return bytes.NewReader(body), nil
+	return bytes.NewReader(body), "application/json", nil
 }
-
 func maxInlineFileBytes() int64 {
 	limitMB := constant.MaxFileDownloadMB
 	if limitMB <= 0 {
@@ -1185,6 +1203,147 @@ func (a *TaskAdaptor) buildSubmit(c *gin.Context, info *relaycommon.RelayInfo) (
 	return a.submit, nil
 }
 
+// maxPrepareResponseBytes bounds each pre-submit response the host buffers.
+const maxPrepareResponseBytes = 1 << 20
+
+// prepareSubmit runs the optional pre-submit phase. Some vendors cannot accept a
+// task reference inline: the asset must be registered first and the task then
+// references the returned identifier. A plugin that needs this exports
+// buildPrepareRequest; the host sends every descriptor it returns (in order),
+// forwards the decoded responses to parsePrepareResponse, and exposes the result
+// to buildSubmitRequest as ctx.prepared.
+func (a *TaskAdaptor) prepareSubmit(c *gin.Context, info *relaycommon.RelayInfo) error {
+	if a.preparedOnce {
+		return nil
+	}
+	requestContext := c.Request.Context()
+	if !a.hasHook(requestContext, "buildPrepareRequest") {
+		return nil
+	}
+	a.preparedOnce = true
+	started := time.Now()
+	value, err := a.plugin.Engine.Call(requestContext, "buildPrepareRequest", a.submitContext(c, info))
+	if err != nil {
+		logger.LogDebug(c, "task_plugin subsystem=adaptor event=prepare_failed plugin=%q stage=build_prepare_request elapsed_ms=%d", a.plugin.Meta.Key, time.Since(started).Milliseconds())
+		return err
+	}
+	descriptors, err := decodePrepareDescriptors(value)
+	if err != nil {
+		logger.LogDebug(c, "task_plugin subsystem=adaptor event=prepare_failed plugin=%q stage=decode_prepare_request elapsed_ms=%d", a.plugin.Meta.Key, time.Since(started).Milliseconds())
+		return err
+	}
+	if len(descriptors) == 0 {
+		return nil
+	}
+	responses := make([]any, 0, len(descriptors))
+	for index := range descriptors {
+		response, sendErr := a.sendDescriptor(c, info, &descriptors[index])
+		if sendErr != nil {
+			logger.LogDebug(c, "task_plugin subsystem=adaptor event=prepare_failed plugin=%q stage=send index=%d elapsed_ms=%d", a.plugin.Meta.Key, index, time.Since(started).Milliseconds())
+			return sendErr
+		}
+		hookResponse, readErr := readHookResponse(response)
+		if readErr != nil {
+			return readErr
+		}
+		responses = append(responses, hookResponse)
+	}
+	prepared, err := a.plugin.Engine.Call(requestContext, "parsePrepareResponse", a.submitContext(c, info), responses)
+	if err != nil {
+		logger.LogDebug(c, "task_plugin subsystem=adaptor event=prepare_failed plugin=%q stage=parse_prepare_response elapsed_ms=%d", a.plugin.Meta.Key, time.Since(started).Milliseconds())
+		return err
+	}
+	a.prepared = jsonValue(prepared)
+	logger.LogDebug(c, "task_plugin subsystem=adaptor event=prepare_complete plugin=%q requests=%d elapsed_ms=%d", a.plugin.Meta.Key, len(descriptors), time.Since(started).Milliseconds())
+	return nil
+}
+
+// readHookResponse decodes one pre-submit response into the hook-facing shape
+// used by parseSubmitResponse.
+func readHookResponse(resp *http.Response) (map[string]any, error) {
+	if resp == nil {
+		return map[string]any{"statusCode": 0, "headers": map[string][]string{}, "body": nil}, nil
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxPrepareResponseBytes+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(body)) > maxPrepareResponseBytes {
+		return nil, fmt.Errorf("prepare response exceeds %d bytes", maxPrepareResponseBytes)
+	}
+	value := any(string(body))
+	var decoded any
+	if common.Unmarshal(body, &decoded) == nil {
+		value = decoded
+	}
+	headers := make(map[string][]string, len(resp.Header))
+	maps.Copy(headers, resp.Header)
+	return map[string]any{"statusCode": resp.StatusCode, "headers": headers, "body": value}, nil
+}
+
+// decodePrepareDescriptors accepts either a single descriptor or a list of them;
+// an empty descriptor means the plugin needs no pre-submit phase for this call.
+func decodePrepareDescriptors(value any) ([]requestDescriptor, error) {
+	if value == nil {
+		return nil, nil
+	}
+	if list, ok := value.([]any); ok {
+		descriptors := make([]requestDescriptor, 0, len(list))
+		for _, item := range list {
+			var descriptor requestDescriptor
+			if err := convert(item, &descriptor); err != nil {
+				return nil, err
+			}
+			if strings.TrimSpace(descriptor.URL) == "" {
+				return nil, fmt.Errorf("plugin returned an empty prepare URL")
+			}
+			descriptors = append(descriptors, descriptor)
+		}
+		return descriptors, nil
+	}
+	var descriptor requestDescriptor
+	if err := convert(value, &descriptor); err != nil {
+		return nil, err
+	}
+	if strings.TrimSpace(descriptor.URL) == "" {
+		return nil, nil
+	}
+	return []requestDescriptor{descriptor}, nil
+}
+
+// sendDescriptor executes a descriptor built by a plugin hook. It reuses the
+// descriptor encoder so multipart uploads and inlined file placeholders behave
+// exactly as they do for the task submission itself.
+func (a *TaskAdaptor) sendDescriptor(c *gin.Context, info *relaycommon.RelayInfo, descriptor *requestDescriptor) (*http.Response, error) {
+	if err := pluginruntime.ValidateRequestURL(descriptor.URL, info.ChannelBaseUrl, a.plugin.Meta.AllowedHosts); err != nil {
+		return nil, err
+	}
+	body, contentType, err := a.encodeDescriptor(c, descriptor)
+	if err != nil {
+		return nil, err
+	}
+	method := strings.ToUpper(strings.TrimSpace(descriptor.Method))
+	if method == "" {
+		method = http.MethodPost
+	}
+	request, err := http.NewRequestWithContext(c.Request.Context(), method, descriptor.URL, body)
+	if err != nil {
+		return nil, err
+	}
+	for name, value := range descriptor.Headers {
+		request.Header.Set(name, value)
+	}
+	if contentType != "" && request.Header.Get("Content-Type") == "" {
+		request.Header.Set("Content-Type", contentType)
+	}
+	_, _, proxy := a.queryCredentials()
+	client, err := service.GetHttpClientWithProxy(proxy)
+	if err != nil {
+		return nil, err
+	}
+	return client.Do(request)
+}
 func (a *TaskAdaptor) submitContext(c *gin.Context, info *relaycommon.RelayInfo) map[string]any {
 	routeRequest := pluginruntime.RouteRequestContext{
 		Params:      map[string]string{},
@@ -1288,6 +1447,9 @@ func (a *TaskAdaptor) submitContext(c *gin.Context, info *relaycommon.RelayInfo)
 		}
 	} else {
 		ctx["authError"] = err.Error()
+	}
+	if a.prepared != nil {
+		ctx["prepared"] = jsonValue(a.prepared)
 	}
 	return ctx
 }
